@@ -20,3 +20,10 @@ export interface AuthContextType {
   session: Session | null;
   initialized : boolean
 }
+
+
+export interface UpdateProfilePayload {
+  fullName: string;
+  phone: string;
+  avatarUrl?: string;
+}
