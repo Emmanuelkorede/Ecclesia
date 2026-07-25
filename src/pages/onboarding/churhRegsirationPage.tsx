@@ -15,7 +15,7 @@ export default function ChurchRegistrationPage() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
@@ -26,7 +26,6 @@ export default function ChurchRegistrationPage() {
 
     setSubmitting(true);
     try {
-      // Slug and church_code are generated here, NOT typed by the admin
       const slug = generateSlug(name);
       const churchCode = generateChurchCode();
 
@@ -35,11 +34,11 @@ export default function ChurchRegistrationPage() {
         user.id
       );
 
-      // Refresh so useActiveOrg picks up the new membership immediately,
-      // without needing a full page reload
+      // refreshMemberships re-pulls memberships + sets the new org as active,
+      // since it's the only membership this user now has (or the newest one)
       await refreshMemberships();
 
-      navigate('/dashboard', { replace: true });
+      navigate('/PLACEHOLDER_ADMIN_DASHBOARD', { replace: true });
     } catch (err: any) {
       setError(err.message ?? 'Failed to create church. Please try again.');
     } finally {

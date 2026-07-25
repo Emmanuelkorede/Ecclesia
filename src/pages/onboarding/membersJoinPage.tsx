@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { useAuth } from '../../hooks/useAuth';
 import { useActiveOrg } from '../../hooks/useActiveOrg';
 import { getOrgByCode } from '../../services/orgService';
@@ -33,10 +33,6 @@ export default function MemberJoinPage() {
         return;
       }
 
-      // Create the membership directly here — this is a one-off action
-      // used only on this page, so it doesn't need its own service file yet.
-      // If you later reuse this insert logic elsewhere, move it into
-      // membershipService.ts.
       const { error: membershipError } = await supabase.from('memberships').insert({
         user_id: user.id,
         org_id: org.id,
@@ -47,7 +43,8 @@ export default function MemberJoinPage() {
       if (membershipError) throw membershipError;
 
       await refreshMemberships();
-      navigate('/dashboard', { replace: true });
+
+      navigate('/PLACEHOLDER_MEMBER_DASHBOARD', { replace: true });
     } catch (err: any) {
       setError(err.message ?? 'Failed to join church. Please try again.');
     } finally {
