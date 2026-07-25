@@ -7,7 +7,6 @@ export type AuthSession = Session;
 export interface SignUpPayload {
   email: string;
   password: string;
-  fullName: string;
 }
 
 export interface LoginPayload {
