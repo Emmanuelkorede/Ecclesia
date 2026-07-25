@@ -1,6 +1,7 @@
 import { supabase } from "../lib/supabase";
+import {type SignUpPayload ,type LoginPayload } from "../types/auth.types";
 
-export async function signUp(email: string, password: string, fullName: string) {
+export async function signUp({ email, password, fullName }: SignUpPayload) {
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
@@ -13,7 +14,7 @@ export async function signUp(email: string, password: string, fullName: string) 
 }
 
 // Sign in with email/password
-export async function signInWithPassword(email: string, password: string) {
+export async function signInWithPassword({ email, password }: LoginPayload) {
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) throw error;
   return data;

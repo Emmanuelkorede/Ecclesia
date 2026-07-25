@@ -1,18 +1,12 @@
 import React, { createContext, useEffect, useState } from 'react';
-import type { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
-
-interface AuthContextType {
-  user: User | null;
-  session: Session | null;
-  initialized : boolean
-}
+import {type AuthContextType  ,type AuthSession ,type AuthUser} from '../types/auth.types';
 
  const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [session, setSession] = useState<Session | null>(null);
-  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<AuthSession | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [initialized, setInitialized] = useState(false) // has the first check run?
 
 
