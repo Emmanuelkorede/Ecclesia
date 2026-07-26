@@ -29,7 +29,6 @@ export async function createAttendanceSession(payload: CreateSessionPayload): Pr
     })
     .select()
     .single();
-
   if (error) throw error;
   return data;
 }
