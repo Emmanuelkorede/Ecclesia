@@ -10,6 +10,7 @@ export const useAuth = () => {
 
   return {
     ...context,
+    isAuthenticated: !!context.user, 
     signUp: authService.signUp,
     signIn: authService.signInWithPassword,
     signInWithGoogle: authService.signInWithGoogle,

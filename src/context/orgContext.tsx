@@ -51,6 +51,8 @@ export const OrgProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setActiveOrg(matched?.organization ?? null);
     setRole(matched?.role ?? null);
     setLoading(false);
+
+    
   }, [user]);
 
   useEffect(() => {
