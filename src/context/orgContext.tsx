@@ -12,7 +12,7 @@ interface OrgContextType {
   refreshMemberships: () => Promise<void>;
 }
 
- const OrgContext = createContext<OrgContextType | undefined>(undefined);
+const OrgContext = createContext<OrgContextType | undefined>(undefined);
 
 export const OrgProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, initialized } = useAuth();
@@ -24,7 +24,6 @@ export const OrgProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const loadMemberships = useCallback(async () => {
     if (!user) {
-      // Logged out — clear everything
       setMemberships([]);
       setActiveOrg(null);
       setRole(null);
@@ -41,8 +40,6 @@ export const OrgProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     setMemberships(fetchedMemberships);
 
-    // Decide which org should be "active": prefer the one saved on the
-    // profile, otherwise fall back to the first membership found
     const matched =
       fetchedMemberships.find((m) => m.org_id === persistedActiveOrgId) ??
       fetchedMemberships[0] ??
@@ -52,11 +49,15 @@ export const OrgProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setRole(matched?.role ?? null);
     setLoading(false);
 
-    
+    // If we fell back to the first membership because nothing was
+    // persisted yet (or it pointed to a stale/removed org), save it now
+    // so it's remembered next time this user logs in.
+    if (matched && matched.org_id !== persistedActiveOrgId) {
+      await orgService.setActiveOrgId(user.id, matched.org_id);
+    }
   }, [user]);
 
   useEffect(() => {
-    // Wait until AuthContext has finished its initial session check
     if (!initialized) return;
     loadMemberships();
   }, [initialized, loadMemberships]);
@@ -80,4 +81,4 @@ export const OrgProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   );
 };
 
-export const OrgContext_ = OrgContext
+export const OrgContext_ = OrgContext;

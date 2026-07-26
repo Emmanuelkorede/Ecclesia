@@ -5,18 +5,26 @@ import ChoosePathPage from './pages/onboarding/choosePathPage';
 import ChurchRegistrationPage from './pages/onboarding/churhRegsirationPage';
 import MemberJoinPage from './pages/onboarding/membersJoinPage';
 import AuthPage from './pages/public/authPage';
+import ProtectedRoute from './routes/protectedRoute';
+import PublicRoute from './routes/publicRoute';
 
 function App() {
 
   return (
     <>
     <Routes>
-      <Route path='/complete-profile' element={<ProfileCompletionPage />} />
-      <Route path='/choose-path' element={<ChoosePathPage />} />
-      <Route path='/register-church' element={<ChurchRegistrationPage />} />
-      <Route path='/join-church' element={<MemberJoinPage />} />
-      <Route path='/auth' element={<AuthPage />} />
-      <Route path='/PLACEHOLDER_DASHBOARD' element={<div>Dashboard</div>} />
+      <Route element={<PublicRoute />} >
+                  <Route path='/auth' element={<AuthPage />} />
+
+      </Route>
+      
+      <Route element={<ProtectedRoute />} >
+            <Route path='/PLACEHOLDER_DASHBOARD' element={<div>Dashboard</div>} />
+            <Route path='/complete-profile' element={<ProfileCompletionPage />} />
+        <Route path='/choose-path' element={<ChoosePathPage />} />
+        <Route path='/register-church' element={<ChurchRegistrationPage />} />
+        <Route path='/join-church' element={<MemberJoinPage />} />
+      </Route>
     </Routes>
       
     </>
