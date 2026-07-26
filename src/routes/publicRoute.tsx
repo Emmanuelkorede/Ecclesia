@@ -1,29 +1,24 @@
-// src/components/PublicRoute.jsx
-import { Navigate, Outlet } from 'react-router' ;
+// routes/publicRoute.tsx
+import { Navigate, Outlet } from 'react-router';
 import { useAuth } from '../hooks/useAuth';
-
+import { useActiveOrg } from '../hooks/useActiveOrg';
 
 export default function PublicRoute() {
-  const { isAuthenticated, initialized } = useAuth()
+  const { isAuthenticated, initialized } = useAuth();
+  const { role, loading } = useActiveOrg();
 
-  if (!initialized) {
+  if (!initialized || loading) {
     return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100vh' 
-      }}>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
         <p>Loading...</p>
       </div>
-    )
+    );
   }
 
-  // already logged in — send to dashboard
   if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />
+    const destination = role === 'member' ? '/member/dashboard' : '/admin/dashboard';
+    return <Navigate to={destination} replace />;
   }
 
-  // not logged in — render the login/register page
-  return <Outlet />
+  return <Outlet />;
 }
