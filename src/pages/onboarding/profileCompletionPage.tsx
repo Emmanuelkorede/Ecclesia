@@ -7,7 +7,7 @@ import { isValidNigerianPhone } from '../../utils/phoneValidation';
 
 export default function ProfileCompletionPage() {
   const { user } = useAuth();
-  const { profile, loading, isComplete, refreshProfile } = useProfile();
+  const { profile, loading, refreshProfile } = useProfile();
   const navigate = useNavigate();
 
   const [fullName, setFullName] = useState('');
@@ -25,12 +25,7 @@ export default function ProfileCompletionPage() {
     }
   }, [profile]);
 
-  // Already complete (e.g. returning user who somehow lands here) — skip forward
-  useEffect(() => {
-    if (!loading && isComplete) {
-      navigate('/choose-path', { replace: true });
-    }
-  }, [loading, isComplete, navigate]);
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
