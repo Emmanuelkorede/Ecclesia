@@ -19,8 +19,8 @@ function App() {
       </Route>
       
       <Route element={<ProtectedRoute />} >
-            <Route path='/PLACEHOLDER_DASHBOARD' element={<div>Dashboard</div>} />
-            <Route path='/complete-profile' element={<ProfileCompletionPage />} />
+          <Route path='/PLACEHOLDER_DASHBOARD' element={<div>Dashboard</div>} />
+          <Route path='/complete-profile' element={<ProfileCompletionPage />} />
         <Route path='/choose-path' element={<ChoosePathPage />} />
         <Route path='/register-church' element={<ChurchRegistrationPage />} />
         <Route path='/join-church' element={<MemberJoinPage />} />
