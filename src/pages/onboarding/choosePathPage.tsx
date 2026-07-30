@@ -1,18 +1,12 @@
 import { useNavigate  } from 'react-router';
 import { useActiveOrg } from '../../hooks/useActiveOrg';
 import { useAuth } from '../../hooks/useAuth';
-import { useEffect } from 'react';
 
 export default function ChoosePathPage() {
-  const { memberships, loading } = useActiveOrg();
+  const { loading } = useActiveOrg();
   const { initialized } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (initialized && !loading && memberships.length > 0) {
-      navigate('/PLACEHOLDER_DASHBOARD', { replace: true });
-    }
-  }, [initialized, loading, memberships, navigate]);
 
   if (!initialized || loading) {
     return (
@@ -20,10 +14,6 @@ export default function ChoosePathPage() {
         <p className="text-[var(--text-muted)]">Loading...</p>
       </div>
     );
-  }
-
-  if (memberships.length > 0) {
-    return null; // useEffect above is already navigating away
   }
 
   return (
