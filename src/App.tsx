@@ -7,23 +7,34 @@ import MemberJoinPage from './pages/onboarding/membersJoinPage';
 import AuthPage from './pages/public/authPage';
 import ProtectedRoute from './routes/protectedRoute';
 import PublicRoute from './routes/publicRoute';
+import ProtectedLayout from './components/layout/protectedLayout';
+import OnboardingGuard from './routes/onboardingGuard';
 
 function App() {
 
   return (
     <>
     <Routes>
-      <Route element={<PublicRoute />} >
-                  <Route path='/auth' element={<AuthPage />} />
-
+      <Route element={<PublicRoute />}>
+        <Route path="/auth" element={<AuthPage />} />
       </Route>
-      
-      <Route element={<ProtectedRoute />} >
-          <Route path='/PLACEHOLDER_DASHBOARD' element={<div>Dashboard</div>} />
-          <Route path='/complete-profile' element={<ProfileCompletionPage />} />
-        <Route path='/choose-path' element={<ChoosePathPage />} />
-        <Route path='/register-church' element={<ChurchRegistrationPage />} />
-        <Route path='/join-church' element={<MemberJoinPage />} />
+
+      <Route element={<ProtectedRoute />}>
+        {/* Layer 1: must be logged in to reach anything below this line */}
+
+        <Route element={<OnboardingGuard />}>
+          {/* Layer 2: onboarding-stage routing only */}
+          <Route path="/complete-profile" element={<ProfileCompletionPage />} />
+          <Route path="/choose-path" element={<ChoosePathPage />} />
+          <Route path="/register-church" element={<ChurchRegistrationPage />} />
+          <Route path="/join-church" element={<MemberJoinPage />} />
+        </Route>
+
+        <Route element={<ProtectedLayout />}>
+          {/* Layer 3: fully onboarded, dashboard routing */}
+          <Route path="/admin/dashboard" element={<div>Admin Dashboard</div>} />
+          <Route path="/member/dashboard" element={<div>Member Dashboard</div>} />
+        </Route>
       </Route>
     </Routes>
       
