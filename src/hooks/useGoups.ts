@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useActiveOrg } from './useActiveOrg';
 import { useSubscription } from './useSubscirptionservcies';
 import * as groupService from '../services/groupServives';
+import type { GroupWithDetails } from '../services/groupServives';
 import { isAtGroupLimit, getPlanLimits, getEffectivePlanForLimits } from '../utils/planLimits';
 import type { Database } from '../types/database.types';
 
@@ -10,7 +11,7 @@ type Group = Database['public']['Tables']['groups']['Row'];
 export function useGroups() {
   const { activeOrg } = useActiveOrg();
   const { currentPlan, isExpired } = useSubscription();
-  const [groups, setGroups] = useState<Group[]>([]);
+  const [groups, setGroups] = useState<GroupWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
