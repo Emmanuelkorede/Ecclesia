@@ -10,16 +10,29 @@ interface CreateGroupPayload {
   leaderId?: string;
 }
 
-export async function getGroupsForOrg(orgId: string): Promise<Group[]> {
+export interface GroupWithDetails extends Group {
+  leader_name: string | null;
+  member_count: number;
+}
+
+
+
+export async function getGroupsForOrg(orgId: string): Promise<GroupWithDetails[]> {
   const { data, error } = await supabase
     .from('groups')
-    .select('*')
+    .select('*, leader:profiles(full_name), group_members(count)')
     .eq('org_id', orgId)
     .order('created_at', { ascending: true });
 
   if (error) throw error;
-  return data ?? [];
+
+  return (data ?? []).map((g: any) => ({
+    ...g,
+    leader_name: g.leader?.full_name ?? null,
+    member_count: g.group_members?.[0]?.count ?? 0,
+  }));
 }
+
 
 export async function createGroup(payload: CreateGroupPayload): Promise<Group> {
   const { data, error } = await supabase
