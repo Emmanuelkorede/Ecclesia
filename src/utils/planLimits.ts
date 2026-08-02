@@ -88,3 +88,11 @@ export function getEffectivePlanForLimits(
 ): 'free' | 'growth' | 'enterprise' {
   return isExpired ? 'free' : currentPlan;
 }
+
+export function canUseCsvExport(plan: PlanTier): boolean {
+  return PLAN_LIMITS[plan].csvExport;
+}
+
+export function canUsePdfExport(plan: PlanTier): boolean {
+  return PLAN_LIMITS[plan].pdfExport;
+}
