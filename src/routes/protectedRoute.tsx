@@ -20,7 +20,7 @@ export default function ProtectedRoute() {
 
   // not logged in — send them to login
   if (!isAuthenticated) {
-    return <Navigate to="/login" state={{ from: location }}  replace />
+    return <Navigate to="/auth" state={{ from: location }}  replace />
   }
 
   // logged in — render the page
