@@ -10,6 +10,7 @@ import PublicRoute from './routes/publicRoute';
 import ProtectedLayout from './components/layout/protectedLayout';
 import OnboardingGuard from './routes/onboardingGuard';
 import LandingPage from './pages/public/landingPage';
+import PricingPage from './pages/public/pricingPage';
 
 function App() {
 
@@ -19,6 +20,7 @@ function App() {
       <Route element={<PublicRoute />}>
         <Route path="/auth" element={<AuthPage />} />
         <Route path="/" element={<LandingPage />} />
+        <Route path='/pricing' element={<PricingPage />} />
       </Route>
 
       <Route element={<ProtectedRoute />}>
