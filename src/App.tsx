@@ -9,6 +9,7 @@ import ProtectedRoute from './routes/protectedRoute';
 import PublicRoute from './routes/publicRoute';
 import ProtectedLayout from './components/layout/protectedLayout';
 import OnboardingGuard from './routes/onboardingGuard';
+import LandingPage from './pages/public/landingPage';
 
 function App() {
 
@@ -17,6 +18,7 @@ function App() {
     <Routes>
       <Route element={<PublicRoute />}>
         <Route path="/auth" element={<AuthPage />} />
+        <Route path="/" element={<LandingPage />} />
       </Route>
 
       <Route element={<ProtectedRoute />}>
