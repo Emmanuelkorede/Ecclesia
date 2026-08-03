@@ -11,6 +11,7 @@ import ProtectedLayout from './components/layout/protectedLayout';
 import OnboardingGuard from './routes/onboardingGuard';
 import LandingPage from './pages/public/landingPage';
 import PricingPage from './pages/public/pricingPage';
+import DashboardPage from './pages/admin/dashBoard';
 
 function App() {
 
@@ -36,7 +37,7 @@ function App() {
 
         <Route element={<ProtectedLayout />}>
           {/* Layer 3: fully onboarded, dashboard routing */}
-          <Route path="/admin/dashboard" element={<div>Admin Dashboard</div>} />
+          <Route path="/admin/dashboard" element={<DashboardPage />} />
           <Route path="/member/dashboard" element={<div>Member Dashboard</div>} />
         </Route>
       </Route>
