@@ -62,7 +62,7 @@ export default function AdminBottomNav() {
             to={to}
             className={({ isActive }) =>
               `flex flex-col items-center gap-0.5 text-[10px] px-2 ${
-                isActive ? 'text-brand-600 dark:text-brand-400' : 'text-[var(--text-muted)]'
+                isActive ? 'text-black dark:text-black' : 'text-red'
               }`
             }
           >

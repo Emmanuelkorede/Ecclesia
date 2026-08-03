@@ -69,7 +69,7 @@ export default function EventsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 overflow-y-auto py-8">
           <div className="w-full max-w-md bg-[var(--bg-surface)] rounded-2xl shadow-[var(--card-shadow)] p-6">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold text-[var(--text-main)]">Create event</h2>
+              <h2 className="text-lg font-semibold text-slate-900">Create event</h2>
               <button onClick={() => setShowForm(false)}>
                 <X className="w-5 h-5 text-[var(--text-muted)]" />
               </button>
