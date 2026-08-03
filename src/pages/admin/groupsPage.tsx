@@ -32,9 +32,11 @@ export default function GroupsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-[var(--text-main)]">Groups</h1>
+        <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Create group</h2>
+
         <button
           onClick={() => setShowForm(true)}
-          className="flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium rounded-lg px-4 py-2"
+          className="flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-black text-sm font-medium rounded-lg px-4 py-2"
         >
           <Plus className="w-4 h-4" /> New Group
         </button>
@@ -104,8 +106,8 @@ export default function GroupsPage() {
               key={g.id}
               name={g.name}
               description={g.description}
-              leaderName={null}
-              memberCount={0}
+              leaderName={g.leader_name}
+              memberCount={g.member_count}
               onDelete={() => deleteGroup(g.id)}
             />
           ))}

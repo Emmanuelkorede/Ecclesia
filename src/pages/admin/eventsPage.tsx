@@ -57,7 +57,7 @@ export default function EventsPage() {
         <h1 className="text-2xl font-semibold text-[var(--text-main)]">Events</h1>
         <button
           onClick={() => setShowForm(true)}
-          className="flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium rounded-lg px-4 py-2"
+          className="flex items-center gap-2 bg-black-600 hover:bg-brand-700 text-white text-sm font-medium rounded-lg px-4 py-2"
         >
           <Plus className="w-4 h-4" /> New Event
         </button>

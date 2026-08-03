@@ -14,6 +14,7 @@ import PricingPage from './pages/public/pricingPage';
 import DashboardPage from './pages/admin/dashBoard';
 import EventsPage from './pages/admin/eventsPage';
 import MembersPage from './pages/admin/membersPage';
+import GroupsPage from './pages/admin/groupsPage';
 
 function App() {
 
@@ -43,6 +44,7 @@ function App() {
           <Route path="/member/dashboard" element={<div>Member Dashboard</div>} />
           <Route path='/admin/members' element={<MembersPage />} />
           <Route path='/admin/events' element={<EventsPage />} />
+          <Route path='/admin/groups' element={<GroupsPage />} />
         </Route>
       </Route>
     </Routes>
