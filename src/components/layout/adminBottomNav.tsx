@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router';
-import { LayoutDashboard, Users, CalendarDays, QrCode, MoreHorizontal, X, Megaphone, Video, BarChart3, Sparkles, CreditCard, Settings } from 'lucide-react';
+import { LayoutDashboard, Users, CalendarDays, QrCode, MoreHorizontal, X, Megaphone, Video, BarChart3, Sparkles, CreditCard, Settings, Layers } from 'lucide-react';
 
 const mainLinks = [
   { to: '/admin/dashboard', label: 'Home', icon: LayoutDashboard },
@@ -15,6 +15,7 @@ const moreLinks = [
   { to: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
   { to: '/admin/outreach', label: 'AI Outreach', icon: Sparkles },
   { to: '/admin/billing', label: 'Billing', icon: CreditCard },
+    { to: '/admin/groups', label: 'Groups', icon: Layers },
   { to: '/admin/settings', label: 'Settings', icon: Settings },
 ];
 
