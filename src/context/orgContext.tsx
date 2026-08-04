@@ -55,7 +55,7 @@ export const OrgProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (matched && matched.org_id !== persistedActiveOrgId) {
       await orgService.setActiveOrgId(user.id, matched.org_id);
     }
-  }, [user]);
+  }, [user?.id]);
 
   useEffect(() => {
     if (!initialized) return;

@@ -20,7 +20,7 @@ export function useProfile() {
     const data = await profileService.getProfile(user.id);
     setProfile(data);
     setLoading(false);
-  }, [user]);
+  }, [user?.id]);
 
   useEffect(() => {
     if (!initialized) return;
