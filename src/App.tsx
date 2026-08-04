@@ -16,6 +16,7 @@ import EventsPage from './pages/admin/eventsPage';
 import MembersPage from './pages/admin/membersPage';
 import GroupsPage from './pages/admin/groupsPage';
 import SettingsPage from './pages/admin/settings';
+import AttendanceSessionPage from './pages/admin/attendaceSessionPage';
 
 function App() {
 
@@ -47,6 +48,7 @@ function App() {
           <Route path='/admin/events' element={<EventsPage />} />
           <Route path='/admin/groups' element={<GroupsPage />} />
           <Route path='/admin/settings' element={<SettingsPage />} />
+          <Route path='/admin/attendance' element={<AttendanceSessionPage />} />
         </Route>
       </Route>
     </Routes>
