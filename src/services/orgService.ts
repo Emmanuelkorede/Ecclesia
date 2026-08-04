@@ -9,6 +9,24 @@ interface CreateOrgPayload {
   timezone?: string;
 }
 
+interface UpdateOrgPayload {
+  name?: string;
+  address?: string;
+  slug?: string;
+}
+
+export async function updateOrganization(orgId: string, payload: UpdateOrgPayload): Promise<Organization> {
+  const { data, error } = await supabase
+    .from('organizations')
+    .update(payload)
+    .eq('id', orgId)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
 
 export async function createOrg(payload: CreateOrgPayload, userId: string): Promise<Organization> {
   const { data: org, error: orgError } = await supabase
