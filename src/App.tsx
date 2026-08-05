@@ -17,6 +17,7 @@ import MembersPage from './pages/admin/membersPage';
 import GroupsPage from './pages/admin/groupsPage';
 import SettingsPage from './pages/admin/settings';
 import AttendanceSessionPage from './pages/admin/attendaceSessionPage';
+import AnalyticsPage from './pages/admin/analytics';
 
 function App() {
 
@@ -49,6 +50,7 @@ function App() {
           <Route path='/admin/groups' element={<GroupsPage />} />
           <Route path='/admin/settings' element={<SettingsPage />} />
           <Route path='/admin/attendance' element={<AttendanceSessionPage />} />
+          <Route path='/admin/analytics' element={<AnalyticsPage />} />
         </Route>
       </Route>
     </Routes>
