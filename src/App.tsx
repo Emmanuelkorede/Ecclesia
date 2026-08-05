@@ -18,7 +18,7 @@ import GroupsPage from './pages/admin/groupsPage';
 import SettingsPage from './pages/admin/settings';
 import AttendanceSessionPage from './pages/admin/attendaceSessionPage';
 import AnalyticsPage from './pages/admin/analytics';
-
+import BillingPage from './pages/admin/billingPage';
 function App() {
 
   return (
@@ -51,6 +51,7 @@ function App() {
           <Route path='/admin/settings' element={<SettingsPage />} />
           <Route path='/admin/attendance' element={<AttendanceSessionPage />} />
           <Route path='/admin/analytics' element={<AnalyticsPage />} />
+          <Route path='/admin/billing' element={<BillingPage />} />
         </Route>
       </Route>
     </Routes>
