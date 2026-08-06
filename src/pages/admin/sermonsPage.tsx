@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import { useSermons } from '../../hooks/useSermons';
+import MemberTagPicker from '../../components/groups/MemberTagPicker';
 import { formatShortDate } from '../../utils/dateHelpers';
 import { Plus, X, Trash2, Play } from 'lucide-react';
+
+const SERMON_TAG_SUGGESTIONS = ['Sunday School', 'Digging Deep', 'Youth Service', 'Bible Study', 'Prayer Meeting'];
 
 export default function SermonsPage() {
   const { sermons, loading, createSermon, deleteSermon } = useSermons();
@@ -10,6 +13,7 @@ export default function SermonsPage() {
   const [mediaUrl, setMediaUrl] = useState('');
   const [speaker, setSpeaker] = useState('');
   const [datePreached, setDatePreached] = useState('');
+  const [tags, setTags] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -23,11 +27,13 @@ export default function SermonsPage() {
         mediaUrl,
         speaker: speaker || undefined,
         datePreached: datePreached || undefined,
+        tags,
       });
       setTitle('');
       setMediaUrl('');
       setSpeaker('');
       setDatePreached('');
+      setTags([]);
       setShowForm(false);
     } catch (err: any) {
       setError(err.message ?? 'Failed to add sermon.');
@@ -49,7 +55,7 @@ export default function SermonsPage() {
       </div>
 
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 overflow-y-auto py-8">
           <div className="w-full max-w-md bg-[var(--bg-surface)] rounded-2xl shadow-[var(--card-shadow)] p-6">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-semibold text-[var(--text-main)]">Add sermon</h2>
@@ -111,6 +117,12 @@ export default function SermonsPage() {
                   className="w-full rounded-lg border border-[var(--border-subtle)] bg-transparent px-3 py-2 text-sm text-[var(--text-main)] focus:outline-none focus:ring-2 focus:ring-brand-500"
                 />
               </div>
+              <div>
+                <label className="block text-sm font-medium text-[var(--text-main)] mb-1">
+                  Tags <span className="text-[var(--text-muted)]">(optional)</span>
+                </label>
+                <MemberTagPicker tags={tags} onChange={setTags} suggestions={SERMON_TAG_SUGGESTIONS} />
+              </div>
               <button
                 type="submit"
                 disabled={submitting}
@@ -123,7 +135,7 @@ export default function SermonsPage() {
         </div>
       )}
 
-{loading ? (
+      {loading ? (
         <p className="text-sm text-[var(--text-muted)]">Loading sermons...</p>
       ) : sermons.length === 0 ? (
         <p className="text-sm text-[var(--text-muted)]">No sermons yet — add your first one above.</p>
@@ -142,8 +154,19 @@ export default function SermonsPage() {
               </div>
               {s.speaker && <p className="text-xs text-[var(--text-muted)]">{s.speaker}</p>}
               <p className="text-xs text-[var(--text-muted)]">{formatShortDate(s.date_preached ?? '')}</p>
+              {(s.tags ?? []).length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {s.tags!.map((t) => (
+                    <span
+                      key={t}
+                      className="text-[10px] font-medium bg-brand-50 dark:bg-brand-950/40 text-brand-700 dark:text-brand-300 px-2 py-0.5 rounded-full"
+                    >
+                      {t}
+                    </span>
+                  ))}
+                </div>
+              )}
               <div className="flex items-center justify-between mt-3">
-                {/* Fixed the missing '<a ' right below this line */}
                 <a
                   href={s.media_url}
                   target="_blank"
