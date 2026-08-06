@@ -117,13 +117,12 @@ export async function manualCheckIn(sessionId: string, userId: string, adminId: 
 export async function getLogsForSession(sessionId: string) {
   const { data, error } = await supabase
     .from('attendance_logs')
-    .select('*, profile:profiles(*)')
+    .select('*, profile:profiles!attendance_logs_user_id_fkey(*)')
     .eq('session_id', sessionId);
 
   if (error) throw error;
   return data ?? [];
 }
-
 // Member's own attendance history — used by MyAttendancePage later
 export async function getMyAttendanceLogs(userId: string): Promise<AttendanceLog[]> {
   const { data, error } = await supabase
