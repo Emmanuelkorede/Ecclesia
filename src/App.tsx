@@ -24,6 +24,7 @@ import SermonsPage from './pages/admin/sermonsPage';
 import AnnouncementsPage from './pages/admin/annoucmentPage';
 import MemberDashboardPage from './pages/member/memberDashboard';
 import CheckInPage from './pages/member/checkinPage';
+import ScheduleSermonsPage from './pages/member/serMonsPage';
 
 function App() {
 
@@ -50,7 +51,6 @@ function App() {
         <Route element={<ProtectedLayout />}>
           {/* Layer 3: fully onboarded, dashboard routing */}
           <Route path="/admin/dashboard" element={<DashboardPage />} />
-          <Route path="/member/dashboard" element={<div>Member Dashboard</div>} />
           <Route path='/admin/members' element={<MembersPage />} />
           <Route path='/admin/events' element={<EventsPage />} />
           <Route path='/admin/groups' element={<GroupsPage />} />
@@ -59,12 +59,13 @@ function App() {
           <Route path='/admin/analytics' element={<AnalyticsPage />} />
           <Route path='/admin/billing' element={<BillingPage />} />
           <Route path='/admin/sermons' element={<SermonsPage />} />
-          <Route path='/premium' element={<PremiumPage />} />
+          <Route  path='/premium' element={<PremiumPage />} />
           <Route path='/admin/announcements' element={<AnnouncementsPage />} />
 
           //member 
           <Route path='/member/dashboard' element={<MemberDashboardPage />} />
           <Route path='/member/check-in' element={<CheckInPage />} />
+          <Route path='/member/sermons' element={<ScheduleSermonsPage />} />
         </Route>
       </Route>
     </Routes>
