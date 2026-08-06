@@ -44,7 +44,7 @@ export default function MemberJoinPage() {
 
       await refreshMemberships();
 
-      navigate('/PLACEHOLDER_MEMBER_DASHBOARD', { replace: true });
+      navigate('/member/dashboard', { replace: true });
     } catch (err: any) {
       setError(err.message ?? 'Failed to join church. Please try again.');
     } finally {
