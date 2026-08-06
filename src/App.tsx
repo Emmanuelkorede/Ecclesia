@@ -20,7 +20,8 @@ import AttendanceSessionPage from './pages/admin/attendaceSessionPage';
 import AnalyticsPage from './pages/admin/analytics';
 import BillingPage from './pages/admin/billingPage';
 import PremiumPage from './pages/admin/premuimPage';
-
+import SermonsPage from './pages/admin/sermonsPage';
+import AnnouncementsPage from './pages/admin/annoucmentPage';
 
 function App() {
 
@@ -55,7 +56,9 @@ function App() {
           <Route path='/admin/attendance' element={<AttendanceSessionPage />} />
           <Route path='/admin/analytics' element={<AnalyticsPage />} />
           <Route path='/admin/billing' element={<BillingPage />} />
+          <Route path='/admin/sermons' element={<SermonsPage />} />
           <Route path='/premium' element={<PremiumPage />} />
+          <Route path='/admin/announcements' element={<AnnouncementsPage />} />
         </Route>
       </Route>
     </Routes>
