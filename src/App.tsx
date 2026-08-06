@@ -25,6 +25,7 @@ import AnnouncementsPage from './pages/admin/annoucmentPage';
 import MemberDashboardPage from './pages/member/memberDashboard';
 import CheckInPage from './pages/member/checkinPage';
 import ScheduleSermonsPage from './pages/member/serMonsPage';
+import SchedulePage from './pages/admin/schedulePage';
 
 function App() {
 
@@ -61,6 +62,7 @@ function App() {
           <Route path='/admin/sermons' element={<SermonsPage />} />
           <Route  path='/premium' element={<PremiumPage />} />
           <Route path='/admin/announcements' element={<AnnouncementsPage />} />
+          <Route path='/admin/schedule' element={<SchedulePage />} />
 
           //member 
           <Route path='/member/dashboard' element={<MemberDashboardPage />} />

@@ -17,6 +17,7 @@ const moreLinks = [
   { to: '/admin/billing', label: 'Billing', icon: CreditCard },
     { to: '/admin/groups', label: 'Groups', icon: Layers },
   { to: '/admin/settings', label: 'Settings', icon: Settings },
+  {to : '/admin/schedule', label: 'Schedule', icon: CalendarDays}
 ];
 
 export default function AdminBottomNav() {

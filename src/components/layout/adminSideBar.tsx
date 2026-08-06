@@ -16,6 +16,8 @@ const links = [
   { to: '/admin/outreach', label: 'AI Outreach', icon: Sparkles },
   { to: '/admin/billing', label: 'Billing', icon: CreditCard },
   { to: '/admin/settings', label: 'Settings', icon: Settings },
+    {to : '/admin/schedule', label: 'Schedule', icon: CalendarDays}
+
 ];
 
 export default function AdminSidebar() {
