@@ -19,6 +19,9 @@ import SettingsPage from './pages/admin/settings';
 import AttendanceSessionPage from './pages/admin/attendaceSessionPage';
 import AnalyticsPage from './pages/admin/analytics';
 import BillingPage from './pages/admin/billingPage';
+import PremiumPage from './pages/admin/premuimPage';
+
+
 function App() {
 
   return (
@@ -52,6 +55,7 @@ function App() {
           <Route path='/admin/attendance' element={<AttendanceSessionPage />} />
           <Route path='/admin/analytics' element={<AnalyticsPage />} />
           <Route path='/admin/billing' element={<BillingPage />} />
+          <Route path='/premium' element={<PremiumPage />} />
         </Route>
       </Route>
     </Routes>
