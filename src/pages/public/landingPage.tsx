@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router';
 import PublicNavbar from '../../components/layout/publicNavbar';
 import { QrCode, Building2, Sparkles, Video } from 'lucide-react';
+import { Logo  } from '../../components/ui/Logo';
 
 const features = [
   {
@@ -68,6 +69,15 @@ export default function LandingPage() {
             View Pricing
           </button>
         </div>
+        <div className="flex items-center justify-between p-4 bg-surface border-b border-subtle">
+      {/* This will make the logo standard text color (dark navy in light mode, white in dark mode). 
+        You can easily change its size using Tailwind h-* classes!
+      */}
+      <Logo className="h-8 w-auto text-main" />
+      
+      {/* Or if you wanted it to be the Accent Emerald color: */}
+      {/* <Logo className="h-12 w-auto text-accent-600" /> */}
+    </div>
 
         <div className="mt-14 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl shadow-[var(--card-shadow)] p-3 max-w-4xl mx-auto">
           <div className="bg-slate-100 dark:bg-slate-800 rounded-xl aspect-video flex items-center justify-center text-[var(--text-muted)] text-sm">
