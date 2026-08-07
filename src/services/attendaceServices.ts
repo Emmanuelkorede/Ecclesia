@@ -124,10 +124,10 @@ export async function getLogsForSession(sessionId: string) {
   return data ?? [];
 }
 // Member's own attendance history — used by MyAttendancePage later
-export async function getMyAttendanceLogs(userId: string): Promise<AttendanceLog[]> {
+export async function getMyAttendanceLogs(userId: string) {
   const { data, error } = await supabase
     .from('attendance_logs')
-    .select('*')
+    .select('*, attendance_sessions(event_id, events(title, start_time))')
     .eq('user_id', userId)
     .order('timestamp', { ascending: false });
 
