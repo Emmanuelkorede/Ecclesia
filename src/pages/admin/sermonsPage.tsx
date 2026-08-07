@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useSermons } from '../../hooks/useSermons';
 import MemberTagPicker from '../../components/groups/MemberTagPicker';
-import VideoEmbed from '../../components/media/videoEmbed';
 import { formatShortDate } from '../../utils/dateHelpers';
 import { Plus, X, Trash2 } from 'lucide-react';
+import VideoLightbox from '../../components/media/lightBox';
 
 const SERMON_TAG_SUGGESTIONS = ['Sunday School', 'Digging Deep', 'Youth Service', 'Bible Study'];
 type FilterRange = 'all' | '7d' | '14d' | '30d';
@@ -117,7 +117,7 @@ export default function SermonsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {filtered.map((s) => (
             <div key={s.id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden">
-              <VideoEmbed url={s.media_url} />
+              <VideoLightbox url={s.media_url} thumbnailLabel={s.title} />
               <div className="p-4">
                 <div className="flex items-start justify-between">
                   <h3 className="font-medium text-slate-900 dark:text-white text-sm">{s.title}</h3>
