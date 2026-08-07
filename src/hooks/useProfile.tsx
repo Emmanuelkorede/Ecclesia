@@ -17,9 +17,22 @@ export function useProfile() {
       return;
     }
     setLoading(true);
-    const data = await profileService.getProfile(user.id);
-    setProfile(data);
-    setLoading(false);
+    try {
+      const data = await profileService.getProfile(user.id);
+      setProfile(data);
+    } catch (err: any) {
+      // Transient clock-skew/token-timing error right after signup —
+      // wait briefly and retry once before giving up.
+      if (err?.code === 'PGRST303') {
+        await new Promise((resolve) => setTimeout(resolve, 800));
+        const retryData = await profileService.getProfile(user.id);
+        setProfile(retryData);
+      } else {
+        throw err;
+      }
+    } finally {
+      setLoading(false);
+    }
   }, [user?.id]);
 
   useEffect(() => {

@@ -38,7 +38,7 @@ export default function ChurchRegistrationPage() {
       // since it's the only membership this user now has (or the newest one)
       await refreshMemberships();
 
-      navigate('/PLACEHOLDER_ADMIN_DASHBOARD', { replace: true });
+      navigate('/admin/dashboard', { replace: true });
     } catch (err: any) {
       setError(err.message ?? 'Failed to create church. Please try again.');
     } finally {
