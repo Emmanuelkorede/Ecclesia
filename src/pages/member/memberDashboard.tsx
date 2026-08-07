@@ -70,6 +70,7 @@ export default function MemberDashboardPage() {
               <div
                 key={a.id}
                 className="border-t border-slate-200 dark:border-slate-700 pt-3 first:border-0 first:pt-0"
+                onClick={() => navigate(`/member/announcements/${a.id}`)}
               >
                 <p className="text-sm font-medium text-slate-900 dark:text-white">{a.title}</p>
                 <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">{a.content}</p>
