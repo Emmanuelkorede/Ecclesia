@@ -13,6 +13,9 @@ interface CreateSchedulePayload {
   groupId?: string;
 }
 
+
+
+
 export async function getSchedulesForOrg(orgId: string): Promise<Schedule[]> {
   const { data, error } = await supabase
     .from('church_schedules')
@@ -42,6 +45,36 @@ export async function createSchedule(payload: CreateSchedulePayload): Promise<Sc
   if (error) throw error;
   return data;
 }
+
+export async function updateSchedule(
+  scheduleId: string,
+  payload: Partial<{
+    title: string;
+    dayOfWeek: number;
+    startTime: string;
+    endTime: string;
+    location: string;
+    groupId: string;
+  }>
+): Promise<Schedule> {
+  const { data, error } = await supabase
+    .from('church_schedules')
+    .update({
+      title: payload.title,
+      day_of_week: payload.dayOfWeek,
+      start_time: payload.startTime,
+      end_time: payload.endTime,
+      location: payload.location ?? null,
+      group_id: payload.groupId ?? null,
+    })
+    .eq('id', scheduleId)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
 
 export async function deleteSchedule(scheduleId: string): Promise<void> {
   const { error } = await supabase.from('church_schedules').delete().eq('id', scheduleId);

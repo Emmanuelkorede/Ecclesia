@@ -37,5 +37,11 @@ export function useSchedule() {
     await load();
   };
 
-  return { schedules, loading, createSchedule, deleteSchedule, refresh: load };
+  const updateSchedule = async (scheduleId: string, params: Parameters<typeof scheduleService.updateSchedule>[1]) => {
+  await scheduleService.updateSchedule(scheduleId, params);
+  await load();
+};
+
+return { schedules, loading, createSchedule, updateSchedule, deleteSchedule, refresh: load };
+
 }
