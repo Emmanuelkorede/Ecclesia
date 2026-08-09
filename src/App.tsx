@@ -28,6 +28,7 @@ import ScheduleSermonsPage from './pages/member/serMonsPage';
 import SchedulePage from './pages/admin/schedulePage';
 import AnnouncementDetailPage from './pages/member/announcementDetailsPage';
 import MyAttendancePage from './pages/member/myAttendance';
+import ProfilePage from './pages/member/profilePage';
 
 function App() {
 
@@ -72,6 +73,7 @@ function App() {
           <Route path='/member/sermons' element={<ScheduleSermonsPage />} />
           <Route path='/member/announcements/:id' element={<AnnouncementDetailPage />} />
           <Route path='/member/attendance' element={<MyAttendancePage />} />
+          <Route path='/member/profile' element={<ProfilePage />} />
         </Route>
       </Route>
     </Routes>
