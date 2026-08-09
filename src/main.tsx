@@ -6,15 +6,18 @@ import App from './App.tsx'
 import { ThemeProvider } from './context/ThemeContext.tsx' ; 
 import { OrgProvider } from './context/orgContext.tsx' ;
 import { AuthProvider } from './context/authContext.tsx'
+import { ProfileProvider } from './context/ProfileContext.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
       <ThemeProvider>
         <AuthProvider>
-          <OrgProvider>
-            <App />
-          </OrgProvider>
+          <ProfileProvider>
+            <OrgProvider>
+              <App />
+            </OrgProvider>
+          </ProfileProvider>
         </AuthProvider>
   
       </ThemeProvider>
