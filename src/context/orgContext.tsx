@@ -21,6 +21,7 @@ export const OrgProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [activeOrg, setActiveOrg] = useState<Organization | null>(null);
   const [role, setRole] = useState<Role | null>(null);
   const [loading, setLoading] = useState(true);
+  const [lastUserId, setLastUserId] = useState<string | undefined>(undefined);
 
   const loadMemberships = useCallback(async () => {
     if (!user) {
@@ -49,13 +50,18 @@ export const OrgProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setRole(matched?.role ?? null);
     setLoading(false);
 
-    // If we fell back to the first membership because nothing was
-    // persisted yet (or it pointed to a stale/removed org), save it now
-    // so it's remembered next time this user logs in.
     if (matched && matched.org_id !== persistedActiveOrgId) {
       await orgService.setActiveOrgId(user.id, matched.org_id);
     }
   }, [user?.id]);
+
+  // Same fix as ProfileContext: reset loading synchronously during render
+  // when the user identity changes, so no component can ever read a
+  // stale "loading: false, role: <old value>" combination.
+  if (user?.id !== lastUserId) {
+    setLastUserId(user?.id);
+    setLoading(true);
+  }
 
   useEffect(() => {
     if (!initialized) return;
