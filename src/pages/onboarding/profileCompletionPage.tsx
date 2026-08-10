@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router';
 import { useAuth } from '../../hooks/useAuth';
 import { useProfile } from '../../hooks/useProfile';
 import { updateProfile } from '../../services/profileServices';
-import { isValidNigerianPhone } from '../../utils/phoneValidation';
+import { isValidNigerianPhone , normalizeNigerianPhone } from '../../utils/phoneValidation';
 
 export default function ProfileCompletionPage() {
   const { user } = useAuth();
@@ -27,32 +27,31 @@ export default function ProfileCompletionPage() {
 
 
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setError(null);
 
-    if (!isValidNigerianPhone(phone)) {
-      setError('Please enter a valid Nigerian phone number (e.g. 08122865246).');
-      return;
-    }
-    if (!user) return;
+  if (!isValidNigerianPhone(phone)) {
+    setError('Please enter a valid Nigerian phone number (e.g. 08122865246).');
+    return;
+  }
+  if (!user) return;
 
-    setSubmitting(true);
-    try {
-      await updateProfile(user.id, {
-        fullName,
-        phone,
-        avatarUrl: profile?.avatar_url ?? undefined, // preserved from Google if present
-      });
-      await refreshProfile();
-      navigate('/choose-path');
-    } catch (err: any) {
-      setError(err.message ?? 'Failed to save profile.');
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
+  setSubmitting(true);
+  try {
+    await updateProfile(user.id, {
+      fullName,
+      phone: normalizeNigerianPhone(phone), // <-- now saves as +234...
+      avatarUrl: profile?.avatar_url ?? undefined,
+    });
+    await refreshProfile();
+    navigate('/choose-path');
+  } catch (err: any) {
+    setError(err.message ?? 'Failed to save profile.');
+  } finally {
+    setSubmitting(false);
+  }
+};
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[var(--bg-app)]">

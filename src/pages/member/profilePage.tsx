@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useProfile } from '../../hooks/useProfile';
 import { updateProfile } from '../../services/profileServices';
-import { isValidNigerianPhone } from '../../utils/phoneValidation';
 import { getInitials, getAvatarColor } from '../../utils/formatters';
 import { useNavigate } from 'react-router';
 import { LogOut } from 'lucide-react';
+import { isValidNigerianPhone, normalizeNigerianPhone, denormalizeNigerianPhone } from '../../utils/phoneValidation';
+
 
 export default function ProfilePage() {
   const { user, signOut } = useAuth();
@@ -20,34 +21,38 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (profile) {
-      setFullName(profile.full_name);
-      setPhone(profile.phone ?? '');
-    }
+    setFullName(profile.full_name);
+    setPhone(profile.phone ? denormalizeNigerianPhone(profile.phone) : '');
+  }
   }, [profile]);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setSuccess(false);
+  e.preventDefault();
+  setError(null);
+  setSuccess(false);
 
-    if (!isValidNigerianPhone(phone)) {
-      setError('Please enter a valid Nigerian phone number (e.g. 08122865246).');
-      return;
-    }
-    if (!user) return;
+  if (!isValidNigerianPhone(phone)) {
+    setError('Please enter a valid Nigerian phone number (e.g. 08122865246).');
+    return;
+  }
+  if (!user) return;
 
-    setSaving(true);
-    try {
-      await updateProfile(user.id, { fullName, phone, avatarUrl: profile?.avatar_url ?? undefined });
-      await refreshProfile();
-      setSuccess(true);
-      setTimeout(() => setSuccess(false), 2500);
-    } catch (err: any) {
-      setError(err.message ?? 'Failed to update profile.');
-    } finally {
-      setSaving(false);
-    }
-  };
+  setSaving(true);
+  try {
+    await updateProfile(user.id, {
+      fullName,
+      phone: normalizeNigerianPhone(phone),
+      avatarUrl: profile?.avatar_url ?? undefined,
+    });
+    await refreshProfile();
+    setSuccess(true);
+    setTimeout(() => setSuccess(false), 2500);
+  } catch (err: any) {
+    setError(err.message ?? 'Failed to update profile.');
+  } finally {
+    setSaving(false);
+  }
+};
 
   const handleSignOut = async () => {
     await signOut();
