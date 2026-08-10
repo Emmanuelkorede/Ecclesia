@@ -33,6 +33,7 @@ import ProfilePage from './pages/member/profilePage';
 import PaymentApprovalsPage from './pages/platFormOwner/paymentApprovalPage';
 import SaaSOverviewPage from './pages/platFormOwner/saasOverviewPage';
 import PlatformOwnerRoute from './routes/platformOwnnerRoute';
+import PlatformOwnerDeniedPage from './pages/platFormOwner/platformwonerdenied';
 
 function App() {
 
@@ -48,8 +49,9 @@ function App() {
       <Route element={<ProtectedRoute />}>
         {/* Layer 1: must be logged in to reach anything below this line */}
         <Route element={<PlatformOwnerRoute />}>
-      <Route path="/platform-owner/payments" element={<PaymentApprovalsPage />} />
-      <Route path="/platform-owner/overview" element={<SaaSOverviewPage />} />
+          <Route path="/platform-owner/payments" element={<PaymentApprovalsPage />} />
+          <Route path="/platform-owner/overview" element={<SaaSOverviewPage />} />
+          <Route path='/platform-owner-denied' element={<PlatformOwnerDeniedPage />} />
         </Route>
 
 
