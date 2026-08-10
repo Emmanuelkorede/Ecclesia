@@ -81,3 +81,44 @@ export async function rejectSubscription(
   });
   if (error) throw error;
 }
+
+
+
+export interface SaaSOverviewStats {
+  totalChurches: number;
+  totalRevenue: number;
+  planBreakdown: { plan: string; count: number }[];
+}
+
+export async function getSaaSOverview(): Promise<SaaSOverviewStats> {
+  const { count: totalChurches, error: churchError } = await supabase
+    .from('organizations')
+    .select('*', { count: 'exact', head: true });
+
+  if (churchError) throw churchError;
+
+  const { data: activeSubs, error: subsError } = await supabase
+    .from('subscriptions')
+    .select('amount_paid')
+    .eq('status', 'active');
+
+  if (subsError) throw subsError;
+
+  const totalRevenue = (activeSubs ?? []).reduce((sum, s) => sum + Number(s.amount_paid), 0);
+
+  const { data: plans, error: plansError } = await supabase
+    .from('organizations')
+    .select('current_plan');
+
+  if (plansError) throw plansError;
+
+  const counts: Record<string, number> = {};
+  (plans ?? []).forEach((p) => {
+    const plan = p.current_plan ?? 'free';
+    counts[plan] = (counts[plan] ?? 0) + 1;
+  });
+
+  const planBreakdown = Object.entries(counts).map(([plan, count]) => ({ plan, count }));
+
+  return { totalChurches: totalChurches ?? 0, totalRevenue, planBreakdown };
+}
