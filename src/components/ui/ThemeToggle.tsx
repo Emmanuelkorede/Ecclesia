@@ -20,11 +20,12 @@ export const ThemeToggle: React.FC = () => {
         return (
           <button
             key={opt.id}
+            type="button"
             onClick={() => setTheme(opt.id)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 cursor-pointer ${
               isActive
-                ? 'bg-white dark:bg-slate-900 text-brand-900 dark:text-brand-100 shadow-xs'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                ? 'bg-white dark:bg-slate-900 text-main shadow-xs'
+                : 'text-muted hover:text-main'
             }`}
             aria-label={`Switch to ${opt.label} mode`}
           >
