@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router';
-import { LayoutDashboard, Users, CalendarDays, QrCode, MoreHorizontal, X, Megaphone, Video, BarChart3, Sparkles, CreditCard, Settings, Layers } from 'lucide-react';
+import { 
+  LayoutDashboard, Users, CalendarDays, QrCode, MoreHorizontal, 
+  X, Megaphone, Video, BarChart3, Sparkles, CreditCard, Settings, Layers 
+} from 'lucide-react';
 
 const mainLinks = [
   { to: '/admin/dashboard', label: 'Home', icon: LayoutDashboard },
@@ -15,9 +18,9 @@ const moreLinks = [
   { to: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
   { to: '/admin/outreach', label: 'AI Outreach', icon: Sparkles },
   { to: '/admin/billing', label: 'Billing', icon: CreditCard },
-    { to: '/admin/groups', label: 'Groups', icon: Layers },
+  { to: '/admin/groups', label: 'Groups', icon: Layers },
   { to: '/admin/settings', label: 'Settings', icon: Settings },
-  {to : '/admin/schedule', label: 'Schedule', icon: CalendarDays}
+  { to: '/admin/schedule', label: 'Schedule', icon: CalendarDays }
 ];
 
 export default function AdminBottomNav() {
@@ -25,30 +28,47 @@ export default function AdminBottomNav() {
 
   return (
     <>
+      {/* "More" Sheet Modal Overlay */}
       {showMore && (
-        <div className="md:hidden fixed inset-0 z-40 bg-black/40" onClick={() => setShowMore(false)}>
-          <div
-            className="absolute bottom-0 left-0 right-0 bg-[var(--bg-surface)] rounded-t-2xl p-4 pb-8"
+        <div 
+          className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-end sm:items-center justify-center animate-in fade-in duration-200"
+          onClick={() => setShowMore(false)}
+        >
+          <div 
+            className="w-full max-w-lg bg-surface border border-subtle rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl max-h-[85vh] overflow-y-auto animate-in slide-in-from-bottom-5 duration-300"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="font-semibold text-[var(--text-main)]">More</h2>
-              <button onClick={() => setShowMore(false)}>
-                <X className="w-5 h-5 text-[var(--text-muted)]" />
+            {/* Modal Header */}
+            <div className="flex items-center justify-between pb-4 mb-4 border-b border-subtle">
+              <h2 className="text-base font-bold text-main">More Options</h2>
+              <button
+                type="button"
+                onClick={() => setShowMore(false)}
+                className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-muted hover:text-main transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="grid grid-cols-3 gap-4">
+
+            {/* Grid of Extra Links */}
+            <div className="grid grid-cols-2 gap-2.5">
               {moreLinks.map(({ to, label, icon: Icon }) => (
                 <NavLink
                   key={to}
                   to={to}
                   onClick={() => setShowMore(false)}
-                  className="flex flex-col items-center gap-1.5 text-xs text-[var(--text-main)]"
+                  className={({ isActive }) =>
+                    `flex items-center gap-3 p-3 rounded-2xl text-xs sm:text-sm font-medium transition-all ${
+                      isActive
+                        ? 'bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400 font-semibold'
+                        : 'text-main bg-app/50 hover:bg-slate-100 dark:hover:bg-slate-800/60'
+                    }`
+                  }
                 >
-                  <div className="w-11 h-11 rounded-xl bg-[var(--bg-app)] flex items-center justify-center">
-                    <Icon className="w-5 h-5" />
+                  <div className="p-2 rounded-xl bg-surface shadow-xs text-brand-600 dark:text-brand-400 shrink-0">
+                    <Icon className="w-4 h-4" />
                   </div>
-                  {label}
+                  <span className="truncate">{label}</span>
                 </NavLink>
               ))}
             </div>
@@ -56,27 +76,32 @@ export default function AdminBottomNav() {
         </div>
       )}
 
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-[var(--bg-surface)] border-t border-[var(--border-subtle)] flex justify-around py-2">
+      {/* Fixed Mobile Bottom Navigation Bar */}
+      <nav className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-surface/90 backdrop-blur-md border-t border-subtle px-2 py-2 flex items-center justify-around shadow-lg">
         {mainLinks.map(({ to, label, icon: Icon }) => (
           <NavLink
             key={to}
             to={to}
             className={({ isActive }) =>
-              `flex flex-col items-center gap-0.5 text-[10px] px-2 ${
-                isActive ? 'text-black dark:text-black' : 'text-red'
+              `flex flex-col items-center justify-center py-1.5 px-3 rounded-xl transition-colors ${
+                isActive
+                  ? 'text-brand-600 dark:text-brand-400 font-semibold'
+                  : 'text-muted hover:text-main'
               }`
             }
           >
-            <Icon className="w-5 h-5" />
-            {label}
+            <Icon className="w-5 h-5 mb-1" />
+            <span className="text-[10px] tracking-tight">{label}</span>
           </NavLink>
         ))}
+
         <button
+          type="button"
           onClick={() => setShowMore(true)}
-          className="flex flex-col items-center gap-0.5 text-[10px] px-2 text-[var(--text-muted)]"
+          className="flex flex-col items-center justify-center py-1.5 px-3 rounded-xl text-muted hover:text-main transition-colors cursor-pointer"
         >
-          <MoreHorizontal className="w-5 h-5" />
-          More
+          <MoreHorizontal className="w-5 h-5 mb-1" />
+          <span className="text-[10px] tracking-tight">More</span>
         </button>
       </nav>
     </>
