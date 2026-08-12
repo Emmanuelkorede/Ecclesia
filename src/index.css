@@ -1,17 +1,20 @@
-@import "tailwindcss" ; 
+@import "tailwindcss";
+
+/* Tell Tailwind v4 to look for the .dark class instead of system media queries */
+@custom-variant dark (&:where(.dark, .dark *));
 
 :root {
   --text: #6b6375;
   --text-h: #08060d;
-  --bg: #fff;
+  --bg: #ffffff;
+  --surface: #ffffff;
   --border: #e5e4e7;
   --code-bg: #f4f3ec;
   --accent: #aa3bff;
   --accent-bg: rgba(170, 59, 255, 0.1);
   --accent-border: rgba(170, 59, 255, 0.5);
   --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+  --shadow: rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
 
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
   --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
@@ -32,24 +35,36 @@
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
+/* Updated to target the .dark class injected by your ThemeProvider */
+.dark {
+  --text: #9ca3af;
+  --text-h: #f3f4f6;
+  --bg: #16171d;
+  --surface: #1e2029;
+  --border: #2e303a;
+  --code-bg: #1f2028;
+  --accent: #c084fc;
+  --accent-bg: rgba(192, 132, 252, 0.15);
+  --accent-border: rgba(192, 132, 252, 0.5);
+  --social-bg: rgba(47, 48, 58, 0.5);
+  --shadow: rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
+}
 
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
+.dark #social .button-icon {
+  filter: invert(1) brightness(2);
+}
+
+/* Tailwind v4 Theme Mapping */
+@theme {
+  --color-app: var(--bg);
+  --color-surface: var(--surface);
+  --color-main: var(--text-h);
+  --color-muted: var(--text);
+  --color-subtle: var(--border);
+  --color-brand-500: var(--accent);
+  --color-brand-600: var(--accent);
+  --color-brand-700: var(--accent);
+  --color-brand-800: var(--accent);
 }
 
 #root {
@@ -84,6 +99,7 @@ h1 {
     margin: 20px 0;
   }
 }
+
 h2 {
   font-size: 24px;
   line-height: 118%;
@@ -93,6 +109,7 @@ h2 {
     font-size: 20px;
   }
 }
+
 p {
   margin: 0;
 }
