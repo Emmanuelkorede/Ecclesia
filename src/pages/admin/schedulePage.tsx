@@ -1,24 +1,52 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useSchedule } from '../../hooks/useSchedule';
-import { Plus, X, Trash2, Pencil } from 'lucide-react';
+import { 
+  Plus, 
+  X, 
+  Trash2, 
+  Pencil, 
+  Clock, 
+  MapPin, 
+  CalendarDays,
+  AlertCircle
+} from 'lucide-react';
+import { Spinner } from '../../components/ui/Spinner';
 
-const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const DAYS = [
+  'Sunday', 
+  'Monday', 
+  'Tuesday', 
+  'Wednesday', 
+  'Thursday', 
+  'Friday', 
+  'Saturday'
+];
 
 export default function SchedulePage() {
   const { schedules, loading, createSchedule, updateSchedule, deleteSchedule } = useSchedule();
+  
+  // Modal & Form State
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  
+  // Field State
   const [title, setTitle] = useState('');
   const [dayOfWeek, setDayOfWeek] = useState(0);
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
   const [location, setLocation] = useState('');
+  
+  // Status State
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const openCreate = () => {
     setEditingId(null);
-    setTitle(''); setDayOfWeek(0); setStartTime(''); setEndTime(''); setLocation('');
+    setTitle(''); 
+    setDayOfWeek(0); 
+    setStartTime(''); 
+    setEndTime(''); 
+    setLocation('');
     setShowForm(true);
   };
 
@@ -38,108 +66,242 @@ export default function SchedulePage() {
     setSubmitting(true);
     try {
       if (editingId) {
-        await updateSchedule(editingId, { title, dayOfWeek, startTime, endTime, location: location || undefined });
+        await updateSchedule(editingId, { 
+          title, 
+          dayOfWeek, 
+          startTime, 
+          endTime, 
+          location: location || undefined 
+        });
       } else {
-        await createSchedule({ title, dayOfWeek, startTime, endTime, location: location || undefined });
+        await createSchedule({ 
+          title, 
+          dayOfWeek, 
+          startTime, 
+          endTime, 
+          location: location || undefined 
+        });
       }
       setShowForm(false);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred saving the schedule.';
+      setError(errorMessage);
     } finally {
       setSubmitting(false);
     }
   };
 
-  const grouped = DAYS.map((day, i) => ({ day, items: schedules.filter((s) => s.day_of_week === i) }));
+  const grouped = DAYS.map((day, i) => ({ 
+    day, 
+    items: schedules.filter((s) => s.day_of_week === i) 
+  }));
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Weekly Schedule</h1>
-        <button onClick={openCreate}
-          className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg px-4 py-2">
-          <Plus className="w-4 h-4" /> Add Activity
+    <div className="max-w-5xl mx-auto w-full space-y-6 animate-in fade-in duration-300 pb-8">
+      
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-main tracking-tight">Weekly Schedule</h1>
+          <p className="text-muted mt-1 text-sm">
+            Manage recurring weekly activities and services.
+          </p>
+        </div>
+        <button 
+          type="button" 
+          onClick={openCreate}
+          className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white text-sm font-semibold rounded-lg shadow-sm transition-all cursor-pointer"
+        >
+          <Plus className="w-4 h-4" />
+          <span>Add Activity</span>
         </button>
       </div>
 
-      {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-lg p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
-                {editingId ? 'Edit activity' : 'Add weekly activity'}
-              </h2>
-              <button onClick={() => setShowForm(false)}><X className="w-5 h-5 text-slate-500" /></button>
-            </div>
-
-            {error && <div className="mb-4 text-sm text-red-600 bg-red-50 dark:bg-red-950/40 rounded-lg px-3 py-2">{error}</div>}
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-900 dark:text-white mb-1">Title</label>
-                <input type="text" required value={title} onChange={(e) => setTitle(e.target.value)}
-                  className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm text-slate-900 dark:text-white" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-900 dark:text-white mb-1">Day</label>
-                <select value={dayOfWeek} onChange={(e) => setDayOfWeek(Number(e.target.value))}
-                  className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm text-slate-900 dark:text-white">
-                  {DAYS.map((d, i) => <option key={d} value={i}>{d}</option>)}
-                </select>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm font-medium text-slate-900 dark:text-white mb-1">Start</label>
-                  <input type="time" required value={startTime} onChange={(e) => setStartTime(e.target.value)}
-                    className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm text-slate-900 dark:text-white" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-900 dark:text-white mb-1">End</label>
-                  <input type="time" required value={endTime} onChange={(e) => setEndTime(e.target.value)}
-                    className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm text-slate-900 dark:text-white" />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-900 dark:text-white mb-1">Location (optional)</label>
-                <input type="text" value={location} onChange={(e) => setLocation(e.target.value)}
-                  className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm text-slate-900 dark:text-white" />
-              </div>
-              <button type="submit" disabled={submitting}
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg py-2.5 disabled:opacity-50">
-                {submitting ? 'Saving...' : editingId ? 'Save changes' : 'Add activity'}
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
+      {/* Main Content Area */}
       {loading ? (
-        <p className="text-sm text-slate-500">Loading schedule...</p>
+        <div className="flex flex-col items-center justify-center py-16 text-muted">
+          <Spinner size="md" className="text-brand-500 mb-3" />
+          <p className="text-sm font-medium">Loading schedule...</p>
+        </div>
       ) : (
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-6">
           {grouped.map(({ day, items }) => (
-            <div key={day} className="border-b border-slate-200 dark:border-slate-700 last:border-0">
-              <div className="px-4 py-2 bg-slate-50 dark:bg-slate-800/50 text-sm font-semibold text-slate-700 dark:text-slate-300">{day}</div>
+            <div key={day} className="space-y-3">
+              
+              {/* Day Header */}
+              <div className="flex items-center gap-2 pb-1.5 border-b border-subtle">
+                <CalendarDays className="w-4 h-4 text-brand-500" />
+                <h2 className="text-base font-semibold text-main">{day}</h2>
+                <span className="ml-auto text-xs font-medium px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-muted">
+                  {items.length}
+                </span>
+              </div>
+
+              {/* Day Activities List */}
               {items.length === 0 ? (
-                <p className="px-4 py-3 text-sm text-slate-400">No activities</p>
+                <div className="py-4 px-3 text-center rounded-xl border border-dashed border-subtle bg-surface/50">
+                  <p className="text-xs text-muted">No activities scheduled</p>
+                </div>
               ) : (
-                items.map((s) => (
-                  <div key={s.id} className="flex items-center justify-between px-4 py-3">
-                    <div>
-                      <p className="text-sm font-medium text-slate-900 dark:text-white">{s.title}</p>
-                      <p className="text-xs text-slate-500">
-                        {s.start_time.slice(0, 5)} - {s.end_time.slice(0, 5)}{s.location && ` · ${s.location}`}
-                      </p>
+                <div className="space-y-2.5">
+                  {items.map((s) => (
+                    <div 
+                      key={s.id}
+                      className="group flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 px-3.5 bg-surface border border-subtle rounded-xl shadow-sm hover:border-brand-500/40 transition-colors"
+                    >
+                      <div className="space-y-1">
+                        <h3 className="text-sm font-semibold text-main">{s.title}</h3>
+                        <div className="flex flex-wrap items-center gap-2.5 text-xs font-medium text-muted">
+                          <span className="flex items-center gap-1 bg-app px-1.5 py-0.5 rounded border border-subtle">
+                            <Clock className="w-3 h-3 text-brand-500" />
+                            {s.start_time.slice(0, 5)} - {s.end_time.slice(0, 5)}
+                          </span>
+                          {s.location && (
+                            <span className="flex items-center gap-1">
+                              <MapPin className="w-3 h-3" />
+                              <span className="truncate max-w-[140px]">{s.location}</span>
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      
+                      {/* Actions */}
+                      <div className="flex items-center gap-0.5 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                        <button 
+                          type="button" 
+                          onClick={() => openEdit(s)}
+                          className="p-1.5 text-muted hover:text-brand-600 hover:bg-brand-500/10 rounded-md transition-colors cursor-pointer"
+                          title="Edit activity"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </button>
+                        <button 
+                          type="button" 
+                          onClick={() => deleteSchedule(s.id)}
+                          className="p-1.5 text-muted hover:text-red-600 hover:bg-red-500/10 rounded-md transition-colors cursor-pointer"
+                          title="Delete activity"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </div>
-                    <div className="flex gap-2">
-                      <button onClick={() => openEdit(s)}><Pencil className="w-4 h-4 text-slate-400 hover:text-indigo-600" /></button>
-                      <button onClick={() => deleteSchedule(s.id)}><Trash2 className="w-4 h-4 text-red-500" /></button>
-                    </div>
-                  </div>
-                ))
+                  ))}
+                </div>
               )}
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Modal Overlay for Add/Edit */}
+      {showForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 dark:bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-surface w-full max-w-sm rounded-xl shadow-xl border border-subtle overflow-hidden animate-in zoom-in-95 duration-200">
+            
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-5 py-3.5 border-b border-subtle bg-app/50">
+              <h2 className="text-base font-semibold text-main">
+                {editingId ? 'Edit Activity' : 'Add Activity'}
+              </h2>
+              <button 
+                type="button" 
+                onClick={() => setShowForm(false)}
+                className="p-1.5 text-muted hover:text-main hover:bg-surface rounded-lg transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-5">
+              {error && (
+                <div className="flex items-start gap-2 p-3 mb-4 text-xs rounded-lg bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400">
+                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-red-500" />
+                  <span className="leading-snug">{error}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-medium text-main mb-1">Activity Title</label>
+                  <input 
+                    type="text" 
+                    required 
+                    value={title} 
+                    onChange={(e) => setTitle(e.target.value)} 
+                    placeholder="e.g. Sunday Service"
+                    className="w-full px-3 py-2 bg-app border border-subtle rounded-lg text-sm text-main focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 transition-all"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-xs font-medium text-main mb-1">Day of the Week</label>
+                  <select 
+                    value={dayOfWeek} 
+                    onChange={(e) => setDayOfWeek(Number(e.target.value))}
+                    className="w-full px-3 py-2 bg-app border border-subtle rounded-lg text-sm text-main focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 transition-all appearance-none cursor-pointer"
+                  >
+                    {DAYS.map((d, i) => (
+                      <option key={d} value={i}>{d}</option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-medium text-main mb-1">Start Time</label>
+                    <input 
+                      type="time" 
+                      required 
+                      value={startTime} 
+                      onChange={(e) => setStartTime(e.target.value)} 
+                      className="w-full px-3 py-2 bg-app border border-subtle rounded-lg text-sm text-main focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 transition-all cursor-pointer"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-main mb-1">End Time</label>
+                    <input 
+                      type="time" 
+                      required 
+                      value={endTime} 
+                      onChange={(e) => setEndTime(e.target.value)} 
+                      className="w-full px-3 py-2 bg-app border border-subtle rounded-lg text-sm text-main focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 transition-all cursor-pointer"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-main mb-1">
+                    Location <span className="text-muted font-normal">(Optional)</span>
+                  </label>
+                  <input 
+                    type="text" 
+                    value={location} 
+                    onChange={(e) => setLocation(e.target.value)} 
+                    placeholder="e.g. Main Sanctuary"
+                    className="w-full px-3 py-2 bg-app border border-subtle rounded-lg text-sm text-main focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 transition-all"
+                  />
+                </div>
+                
+                <div className="pt-2">
+                  <button 
+                    type="submit" 
+                    disabled={submitting}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white text-sm font-semibold rounded-lg shadow-sm transition-all disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
+                  >
+                    {submitting ? (
+                      <>
+                        <Spinner size="sm" className="text-white" />
+                        <span>Saving...</span>
+                      </>
+                    ) : (
+                      <span>{editingId ? 'Save Changes' : 'Add Activity'}</span>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
         </div>
       )}
     </div>
