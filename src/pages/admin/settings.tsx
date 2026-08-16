@@ -1,12 +1,19 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useActiveOrg } from '../../hooks/useActiveOrg';
 import { generateSlug } from '../../utils/orgHelpers';
 import { updateOrganization } from '../../services/orgService';
 import { canManageOrgSettings } from '../../utils/permissions';
-import { Copy, Check } from 'lucide-react';
+
+// Icons & UI
+import { Copy, Check, AlertCircle, Building, KeyRound, Palette, Save } from 'lucide-react';
+import { ThemeToggle } from '../../components/ui/ThemeToggle'; // Make sure this path matches your structure
+import { AccentPicker } from '../../components/ui/AccentPicker'; // Make sure this path matches your structure
+import { Spinner } from '../../components/ui/Spinner';
 
 export default function SettingsPage() {
   const { activeOrg, role, refreshMemberships } = useActiveOrg();
+  
+  // Form State
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
   const [saving, setSaving] = useState(false);
@@ -40,9 +47,10 @@ export default function SettingsPage() {
         address,
         slug: generateSlug(name),
       });
-      await refreshMemberships(); // re-pulls org data so the UI reflects the change
-    } catch (err: any) {
-      setError(err.message ?? 'Failed to save changes.');
+      await refreshMemberships(); 
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to save changes.';
+      setError(errorMessage);
     } finally {
       setSaving(false);
     }
@@ -51,68 +59,168 @@ export default function SettingsPage() {
   if (!activeOrg) return null;
 
   return (
-    <div className="space-y-6 max-w-lg">
-      <h1 className="text-2xl font-semibold text-[var(--text-main)]">Settings</h1>
-
-      <div className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl p-5">
-        <p className="text-sm text-[var(--text-muted)] mb-2">Your church code</p>
-        <div className="flex items-center gap-2">
-          <span className="font-mono text-xl font-bold text-[var(--text-main)] tracking-wider">
-            {activeOrg.church_code}
-          </span>
-          <button
-            onClick={handleCopyCode}
-            className="flex items-center gap-1 text-xs text-brand-600 hover:underline"
-          >
-            {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-            {copied ? 'Copied' : 'Copy'}
-          </button>
-        </div>
-        <p className="text-xs text-[var(--text-muted)] mt-2">
-          Share this code with members so they can join your church.
+    <div className="max-w-4xl mx-auto w-full space-y-6 pb-12 animate-in fade-in duration-300">
+      
+      {/* Page Header */}
+      <div className="mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-main tracking-tight">Organization Settings</h1>
+        <p className="text-muted mt-1.5 text-sm sm:text-base">
+          Manage {activeOrg.name}'s details, member access, and workspace appearance.
         </p>
       </div>
 
-      {canEdit && (
-        <div className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl p-5">
-          <h2 className="font-semibold text-[var(--text-main)] mb-4">Church details</h2>
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+        
+        {/* Left Column: Forms & Primary Settings */}
+        <div className="md:col-span-7 space-y-6">
+          
+          {/* General Information Card */}
+          <div className="bg-surface border border-subtle rounded-2xl overflow-hidden shadow-sm">
+            <div className="px-6 py-5 border-b border-subtle bg-app/30 flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-brand-500/10 text-brand-600 dark:text-brand-400">
+                <Building className="w-5 h-5" />
+              </div>
+              <div>
+                <h2 className="text-base font-semibold text-main">Church Details</h2>
+                <p className="text-xs text-muted">Update your organization's core information</p>
+              </div>
+            </div>
+            
+            <div className="p-6">
+              {error && (
+                <div className="flex items-start gap-3 p-4 mb-6 text-sm rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400">
+                  <AlertCircle className="w-5 h-5 shrink-0 mt-0.5 text-red-500" />
+                  <span className="leading-snug">{error}</span>
+                </div>
+              )}
 
-          {error && (
-            <div className="mb-4 text-sm text-red-600 bg-red-50 dark:bg-red-950/40 rounded-lg px-3 py-2">
-              {error}
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <div>
+                  <label className="block text-sm font-medium text-main mb-1.5">
+                    Church Name
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    disabled={!canEdit}
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-app border border-subtle rounded-xl text-main focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                    placeholder="Enter church name"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-main mb-1.5">
+                    Address <span className="text-muted font-normal">(Optional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    disabled={!canEdit}
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-app border border-subtle rounded-xl text-main focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                    placeholder="e.g., 123 Faith Avenue"
+                  />
+                </div>
+                
+                {canEdit && (
+                  <div className="pt-2 flex justify-end">
+                    <button
+                      type="submit"
+                      disabled={saving || (!name.trim())}
+                      className="flex items-center gap-2 px-5 py-2.5 bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white text-sm font-semibold rounded-xl shadow-sm transition-all disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
+                    >
+                      {saving ? (
+                        <>
+                          <Spinner size="sm" className="text-white" />
+                          <span>Saving...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Save className="w-4 h-4" />
+                          <span>Save Changes</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                )}
+              </form>
             </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-[var(--text-main)] mb-1">Church name</label>
-              <input
-                type="text"
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full rounded-lg border border-[var(--border-subtle)] bg-transparent px-3 py-2 text-sm text-[var(--text-main)] focus:outline-none focus:ring-2 focus:ring-brand-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-[var(--text-main)] mb-1">Address</label>
-              <input
-                type="text"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                className="w-full rounded-lg border border-[var(--border-subtle)] bg-transparent px-3 py-2 text-sm text-[var(--text-main)] focus:outline-none focus:ring-2 focus:ring-brand-500"
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={saving}
-              className="bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium rounded-lg px-5 py-2.5 disabled:opacity-50"
-            >
-              {saving ? 'Saving...' : 'Save changes'}
-            </button>
-          </form>
+          </div>
         </div>
-      )}
+
+        {/* Right Column: Code & Appearance */}
+        <div className="md:col-span-5 space-y-6">
+          
+          {/* Member Invitation Code Card */}
+          <div className="bg-surface border border-subtle rounded-2xl overflow-hidden shadow-sm">
+            <div className="px-6 py-5 border-b border-subtle bg-app/30 flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                <KeyRound className="w-5 h-5" />
+              </div>
+              <div>
+                <h2 className="text-base font-semibold text-main">Member Access</h2>
+                <p className="text-xs text-muted">Invite members to your workspace</p>
+              </div>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              <p className="text-sm text-main">
+                Share this unique code with your congregation so they can join your workspace during sign-up.
+              </p>
+              
+              <div className="flex items-center justify-between p-3 rounded-xl bg-app border border-subtle">
+                <span className="font-mono text-lg font-bold tracking-wider text-brand-600 dark:text-brand-400 ml-2">
+                  {activeOrg.church_code}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleCopyCode}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
+                    copied 
+                      ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' 
+                      : 'bg-surface hover:bg-slate-100 dark:hover:bg-slate-800 border border-subtle text-main'
+                  }`}
+                >
+                  {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                  {copied ? 'Copied!' : 'Copy'}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Appearance Card */}
+          <div className="bg-surface border border-subtle rounded-2xl overflow-hidden shadow-sm">
+            <div className="px-6 py-5 border-b border-subtle bg-app/30 flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
+                <Palette className="w-5 h-5" />
+              </div>
+              <div>
+                <h2 className="text-base font-semibold text-main">Appearance</h2>
+                <p className="text-xs text-muted">Customize your experience</p>
+              </div>
+            </div>
+            
+            <div className="p-6 space-y-6">
+              
+              {/* Theme Toggle Component */}
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-semibold text-muted uppercase tracking-wider">
+                  Interface Theme
+                </label>
+                <ThemeToggle />
+              </div>
+
+              <div className="h-px w-full bg-subtle" />
+
+              {/* Accent Picker Component */}
+              <AccentPicker />
+
+            </div>
+          </div>
+
+        </div>
+      </div>
     </div>
   );
 }
