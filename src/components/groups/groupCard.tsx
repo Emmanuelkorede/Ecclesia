@@ -11,47 +11,49 @@ interface Props {
 
 export default function GroupCard({ name, description, leaderName, memberCount, onEdit, onDelete }: Props) {
   return (
-    <div className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl p-5 shadow-[var(--card-shadow)]">
-      <div className="flex items-start justify-between mb-3">
-        <div>
-          <h3 className="font-semibold text-[var(--text-main)]">{name}</h3>
+    <div className="group bg-surface border border-subtle rounded-xl p-4 shadow-sm hover:border-brand-500/40 transition-colors flex flex-col justify-between gap-3">
+      <div className="flex items-start justify-between gap-3">
+        <div className="space-y-1">
+          <h3 className="text-sm font-semibold text-main">{name}</h3>
           {description && (
-            <p className="text-sm text-[var(--text-muted)] mt-0.5">{description}</p>
+            <p className="text-xs text-muted line-clamp-2">{description}</p>
           )}
         </div>
 
         {(onEdit || onDelete) && (
-          <div className="flex gap-1 shrink-0">
+          <div className="flex items-center gap-0.5 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity shrink-0">
             {onEdit && (
               <button
                 onClick={onEdit}
-                className="p-1.5 rounded-lg text-[var(--text-muted)] hover:bg-slate-100 dark:hover:bg-slate-800"
+                className="p-1.5 text-muted hover:text-brand-600 hover:bg-brand-500/10 rounded-md transition-colors cursor-pointer"
                 aria-label="Edit group"
+                title="Edit group"
               >
-                <Pencil className="w-4 h-4" />
+                <Pencil className="w-3.5 h-3.5" />
               </button>
             )}
             {onDelete && (
               <button
                 onClick={onDelete}
-                className="p-1.5 rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30"
+                className="p-1.5 text-muted hover:text-red-600 hover:bg-red-500/10 rounded-md transition-colors cursor-pointer"
                 aria-label="Delete group"
+                title="Delete group"
               >
-                <Trash2 className="w-4 h-4" />
+                <Trash2 className="w-3.5 h-3.5" />
               </button>
             )}
           </div>
         )}
       </div>
 
-      <div className="flex items-center justify-between text-sm">
-        <div className="flex items-center gap-1.5 text-[var(--text-muted)]">
-          <Users className="w-4 h-4" />
+      <div className="flex items-center justify-between text-xs pt-2 border-t border-subtle/60">
+        <div className="flex items-center gap-1.5 text-muted">
+          <Users className="w-3.5 h-3.5 text-brand-500" />
           {memberCount} {memberCount === 1 ? 'member' : 'members'}
         </div>
         {leaderName && (
-          <span className="text-[var(--text-muted)]">
-            Led by <span className="text-[var(--text-main)] font-medium">{leaderName}</span>
+          <span className="text-muted">
+            Led by <span className="text-main font-medium">{leaderName}</span>
           </span>
         )}
       </div>
