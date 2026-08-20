@@ -1,3 +1,4 @@
+import type { MouseEvent } from 'react';
 import { Users, Pencil, Trash2 } from 'lucide-react';
 
 interface Props {
@@ -5,8 +6,8 @@ interface Props {
   description: string | null;
   leaderName: string | null;
   memberCount: number;
-  onEdit?: () => void;
-  onDelete?: () => void;
+  onEdit?: (e: MouseEvent<HTMLButtonElement>) => void;
+  onDelete?: (e: MouseEvent<HTMLButtonElement>) => void;
 }
 
 export default function GroupCard({ name, description, leaderName, memberCount, onEdit, onDelete }: Props) {

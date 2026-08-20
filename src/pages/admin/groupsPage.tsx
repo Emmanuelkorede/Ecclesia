@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useGroups } from '../../hooks/useGoups';
 import GroupCard from '../../components/groups/groupCard';
+import GroupMembersModal from '../../components/groups/groupMembersModal';
 import PlanLimitBanner from '../../components/billing/planLimitBanner';
 import { Plus, X, AlertCircle } from 'lucide-react';
 import { Spinner } from '../../components/ui/Spinner';
@@ -11,6 +12,7 @@ export default function GroupsPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
   const [groupToDelete, setGroupToDelete] = useState<GroupWithDetails | null>(null);
+  const [viewingMembersFor, setViewingMembersFor] = useState<{ id: string; name: string } | null>(null);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -230,17 +232,37 @@ export default function GroupsPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {groups.map((g) => (
-            <GroupCard
-              key={g.id}
-              name={g.name}
-              description={g.description}
-              leaderName={g.leader_name}
-              memberCount={g.member_count}
-              onDelete={() => setGroupToDelete(g)}
-              onEdit={() => openEdit(g)}
-            />
+            <div 
+              key={g.id} 
+              onClick={() => setViewingMembersFor({ id: g.id, name: g.name })} 
+              className="cursor-pointer"
+            >
+              <GroupCard
+                name={g.name}
+                description={g.description}
+                leaderName={g.leader_name}
+                memberCount={g.member_count}
+                onDelete={(e) => { 
+                  e.stopPropagation(); 
+                  setGroupToDelete(g); 
+                }}
+                onEdit={(e) => { 
+                  e.stopPropagation(); 
+                  openEdit(g); 
+                }}
+              />
+            </div>
           ))}
         </div>
+      )}
+
+      {/* Modal for Viewing Members */}
+      {viewingMembersFor && (
+        <GroupMembersModal
+          groupId={viewingMembersFor.id}
+          groupName={viewingMembersFor.name}
+          onClose={() => setViewingMembersFor(null)}
+        />
       )}
     </div>
   );
