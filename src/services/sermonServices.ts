@@ -17,7 +17,7 @@ export async function getSermonsForOrg(orgId: string): Promise<Sermon[]> {
     .from('sermons')
     .select('*')
     .eq('org_id', orgId)
-    .order('date_preached', { ascending: false });
+    .order('date_preached', { ascending: true });
 
   if (error) throw error;
   return data ?? [];

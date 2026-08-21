@@ -1,25 +1,8 @@
+import { AlertCircle } from 'lucide-react';
+import {parseVideoUrl } from '../../utils/videoHelpers';
+
 interface Props {
   url: string;
-}
-
-function parseVideoUrl(url: string) {
-  if (url.includes('youtube.com') || url.includes('youtu.be')) {
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-    const match = url.match(regExp);
-    const videoId = match && match[2].length === 11 ? match[2] : null;
-    return videoId ? { type: 'youtube', embedUrl: `https://www.youtube.com/embed/${videoId}` } : null;
-  }
-
-  if (url.includes('vimeo.com')) {
-    const match = url.match(/vimeo\.com\/(\d+)/);
-    return match ? { type: 'vimeo', embedUrl: `https://player.vimeo.com/video/${match[1]}` } : null;
-  }
-
-  if (url.includes('facebook.com')) {
-    return { type: 'facebook', embedUrl: `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}` };
-  }
-
-  return null;
 }
 
 export default function VideoEmbed({ url }: Props) {
@@ -27,19 +10,20 @@ export default function VideoEmbed({ url }: Props) {
 
   if (!video) {
     return (
-      <div className="p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 text-red-600 text-xs rounded-lg">
-        Unsupported video link.
+      <div className="w-full aspect-video bg-surface border border-dashed border-subtle rounded-lg flex flex-col items-center justify-center p-4 text-center text-muted">
+        <AlertCircle className="w-6 h-6 mb-2 opacity-50" />
+        <p className="text-sm font-medium">Unsupported video format</p>
+        <p className="text-xs mt-1">Please provide a valid YouTube, Vimeo, or Facebook link.</p>
       </div>
     );
   }
 
   return (
-    <div className="aspect-video w-full bg-black rounded-xl overflow-hidden">
+    <div className="w-full aspect-video bg-black rounded-lg overflow-hidden relative shadow-inner">
       <iframe
-        className="w-full h-full"
         src={video.embedUrl}
         title="Sermon video"
-        style={{ border: 0 }}
+        className="absolute inset-0 w-full h-full border-0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
         allowFullScreen
       />
