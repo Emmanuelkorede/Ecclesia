@@ -1,23 +1,34 @@
 import { useState, useEffect } from 'react';
 import { useActiveOrg } from '../../hooks/useActiveOrg';
+import { useAuth } from '../../hooks/useAuth';
 import { useAnnouncements } from '../../hooks/useAnnoucments';
 import { useEvents } from '../../hooks/useEvents';
 import * as attendanceService from '../../services/attendaceServices';
 import { formatRelativeTime, formatFullDate, formatTime } from '../../utils/dateHelpers';
 import { useNavigate } from 'react-router';
-import { CalendarDays, QrCode, Radio } from 'lucide-react';
+import { CalendarDays, QrCode, Radio, CheckCircle2 } from 'lucide-react';
 
 export default function MemberDashboardPage() {
   const { activeOrg } = useActiveOrg();
+  const { user } = useAuth();
   const { announcements, loading: announcementsLoading } = useAnnouncements();
   const { events, loading: eventsLoading } = useEvents();
   const navigate = useNavigate();
   const [ongoingSessions, setOngoingSessions] = useState<any[]>([]);
+  const [alreadyCheckedIn, setAlreadyCheckedIn] = useState(false);
 
   useEffect(() => {
     if (!activeOrg) return;
     attendanceService.getActiveSessionsForOrg(activeOrg.id).then(setOngoingSessions);
   }, [activeOrg?.id]);
+
+  useEffect(() => {
+    if (!user || ongoingSessions.length === 0) {
+      setAlreadyCheckedIn(false);
+      return;
+    }
+    attendanceService.hasUserCheckedIn(ongoingSessions[0].id, user.id).then(setAlreadyCheckedIn);
+  }, [ongoingSessions, user?.id]);
 
   const nextEvent = events
     .filter((e) => new Date(e.start_time) > new Date())
@@ -38,20 +49,34 @@ export default function MemberDashboardPage() {
       </div>
 
       {ongoingSessions.length > 0 && (
-        <button
-          onClick={() => navigate('/member/check-in')}
-          className="w-full flex items-center gap-3 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900 rounded-2xl p-4 text-left"
-        >
-          <div className="w-9 h-9 rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 flex items-center justify-center shrink-0 animate-pulse">
-            <Radio className="w-4 h-4" />
+        alreadyCheckedIn ? (
+          <div className="w-full flex items-center gap-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl p-4">
+            <div className="w-9 h-9 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-500 flex items-center justify-center shrink-0">
+              <CheckCircle2 className="w-4 h-4" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                You're checked in — {ongoingSessions[0].events?.title}
+              </p>
+              <p className="text-xs text-slate-500">Attendance is still open for others</p>
+            </div>
           </div>
-          <div>
-            <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">
-              Attendance open now: {ongoingSessions[0].events?.title}
-            </p>
-            <p className="text-xs text-emerald-600 dark:text-emerald-400">Tap to check in</p>
-          </div>
-        </button>
+        ) : (
+          <button
+            onClick={() => navigate('/member/check-in')}
+            className="w-full flex items-center gap-3 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900 rounded-2xl p-4 text-left"
+          >
+            <div className="w-9 h-9 rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 flex items-center justify-center shrink-0 animate-pulse">
+              <Radio className="w-4 h-4" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">
+                Attendance open now: {ongoingSessions[0].events?.title}
+              </p>
+              <p className="text-xs text-emerald-600 dark:text-emerald-400">Tap to check in</p>
+            </div>
+          </button>
+        )
       )}
 
       <button

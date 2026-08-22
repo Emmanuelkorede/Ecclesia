@@ -158,3 +158,15 @@ export async function getActiveSessionsForOrg(orgId: string) {
   if (error) throw error;
   return data ?? [];
 }
+
+export async function hasUserCheckedIn(sessionId: string, userId: string): Promise<boolean> {
+  const { data, error } = await supabase
+    .from('attendance_logs')
+    .select('id')
+    .eq('session_id', sessionId)
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (error) throw error;
+  return !!data;
+}
