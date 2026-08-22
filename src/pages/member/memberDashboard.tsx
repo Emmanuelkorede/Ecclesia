@@ -18,9 +18,9 @@ export default function MemberDashboardPage() {
   const [alreadyCheckedIn, setAlreadyCheckedIn] = useState(false);
 
   useEffect(() => {
-    if (!activeOrg) return;
-    attendanceService.getActiveSessionsForOrg(activeOrg.id).then(setOngoingSessions);
-  }, [activeOrg?.id]);
+  if (!activeOrg || !user) return;
+  attendanceService.getEligibleActiveSessionsForUser(activeOrg.id, user.id).then(setOngoingSessions);
+}, [activeOrg?.id, user?.id]);
 
   useEffect(() => {
     if (!user || ongoingSessions.length === 0) {

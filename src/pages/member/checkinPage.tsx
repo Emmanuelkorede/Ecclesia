@@ -18,20 +18,20 @@ export default function CheckInPage() {
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    if (!user || !activeOrg) return;
-    (async () => {
-      setChecking(true);
-      const sessions = await attendanceService.getActiveSessionsForOrg(activeOrg.id);
-      for (const s of sessions) {
-        const already = await attendanceService.hasUserCheckedIn(s.id, user.id);
-        if (already) {
-          setAlreadyCheckedInFor(s.events?.title ?? 'this event');
-          break;
-        }
+  if (!user || !activeOrg) return;
+  (async () => {
+    setChecking(true);
+    const sessions = await attendanceService.getEligibleActiveSessionsForUser(activeOrg.id, user.id);
+    for (const s of sessions) {
+      const already = await attendanceService.hasUserCheckedIn(s.id, user.id);
+      if (already) {
+        setAlreadyCheckedInFor(s.events?.title ?? 'this event');
+        break;
       }
-      setChecking(false);
-    })();
-  }, [user?.id, activeOrg?.id]);
+    }
+    setChecking(false);
+  })();
+}, [user?.id, activeOrg?.id]);
 
   if (checking) {
     return <p className="text-sm text-slate-500 text-center">Checking status...</p>;

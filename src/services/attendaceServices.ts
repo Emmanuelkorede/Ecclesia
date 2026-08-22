@@ -170,3 +170,23 @@ export async function hasUserCheckedIn(sessionId: string, userId: string): Promi
   if (error) throw error;
   return !!data;
 }
+
+export async function getEligibleActiveSessionsForUser(orgId: string, userId: string) {
+  const sessions = await getActiveSessionsForOrg(orgId);
+
+  // Get this user's group memberships once, up front
+  const { data: userGroups, error } = await supabase
+    .from('group_members')
+    .select('group_id')
+    .eq('user_id', userId);
+
+  if (error) throw error;
+  const userGroupIds = new Set((userGroups ?? []).map((g) => g.group_id));
+
+  // Keep sessions where the event has no group restriction, OR the
+  // restriction matches a group this user actually belongs to.
+  return sessions.filter((s: any) => {
+    const groupId = s.events?.group_id;
+    return !groupId || userGroupIds.has(groupId);
+  });
+}
