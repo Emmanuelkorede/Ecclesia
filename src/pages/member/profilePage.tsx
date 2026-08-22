@@ -6,7 +6,11 @@ import { getInitials, getAvatarColor } from '../../utils/formatters';
 import { useNavigate } from 'react-router';
 import { LogOut } from 'lucide-react';
 import { isValidNigerianPhone, normalizeNigerianPhone, denormalizeNigerianPhone } from '../../utils/phoneValidation';
+import OneSignal from 'react-onesignal';
 
+const enableNotifications = async () => {
+  await OneSignal.Notifications.requestPermission();
+};
 
 export default function ProfilePage() {
   const { user, signOut } = useAuth();
@@ -21,38 +25,38 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (profile) {
-    setFullName(profile.full_name);
-    setPhone(profile.phone ? denormalizeNigerianPhone(profile.phone) : '');
-  }
+      setFullName(profile.full_name);
+      setPhone(profile.phone ? denormalizeNigerianPhone(profile.phone) : '');
+    }
   }, [profile]);
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setError(null);
-  setSuccess(false);
+    e.preventDefault();
+    setError(null);
+    setSuccess(false);
 
-  if (!isValidNigerianPhone(phone)) {
-    setError('Please enter a valid Nigerian phone number (e.g. 08122865246).');
-    return;
-  }
-  if (!user) return;
+    if (!isValidNigerianPhone(phone)) {
+      setError('Please enter a valid Nigerian phone number (e.g. 08122865246).');
+      return;
+    }
+    if (!user) return;
 
-  setSaving(true);
-  try {
-    await updateProfile(user.id, {
-      fullName,
-      phone: normalizeNigerianPhone(phone),
-      avatarUrl: profile?.avatar_url ?? undefined,
-    });
-    await refreshProfile();
-    setSuccess(true);
-    setTimeout(() => setSuccess(false), 2500);
-  } catch (err: any) {
-    setError(err.message ?? 'Failed to update profile.');
-  } finally {
-    setSaving(false);
-  }
-};
+    setSaving(true);
+    try {
+      await updateProfile(user.id, {
+        fullName,
+        phone: normalizeNigerianPhone(phone),
+        avatarUrl: profile?.avatar_url ?? undefined,
+      });
+      await refreshProfile();
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 2500);
+    } catch (err: any) {
+      setError(err.message ?? 'Failed to update profile.');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handleSignOut = async () => {
     await signOut();
@@ -127,18 +131,30 @@ export default function ProfilePage() {
         <button
           type="submit"
           disabled={saving}
-          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg py-2.5 disabled:opacity-50"
+          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg py-2.5 disabled:opacity-50 cursor-pointer"
         >
           {saving ? 'Saving...' : 'Save changes'}
         </button>
       </form>
 
-      <button
-        onClick={handleSignOut}
-        className="w-full flex items-center justify-center gap-2 border border-red-200 dark:border-red-900 text-red-600 font-medium rounded-lg py-2.5 hover:bg-red-50 dark:hover:bg-red-950/30"
-      >
-        <LogOut className="w-4 h-4" /> Sign out
-      </button>
+      {/* Push notifications and Sign Out actions */}
+      <div className="flex flex-col gap-4 pt-2">
+        <button 
+          type="button" 
+          onClick={enableNotifications} 
+          className="text-sm text-indigo-600 dark:text-indigo-400 hover:underline self-start cursor-pointer"
+        >
+          Enable push notifications
+        </button>
+
+        <button
+          type="button"
+          onClick={handleSignOut}
+          className="w-full flex items-center justify-center gap-2 border border-red-200 dark:border-red-900 text-red-600 font-medium rounded-lg py-2.5 hover:bg-red-50 dark:hover:bg-red-950/30 cursor-pointer"
+        >
+          <LogOut className="w-4 h-4" /> Sign out
+        </button>
+      </div>
     </div>
   );
 }

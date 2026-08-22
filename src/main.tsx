@@ -7,6 +7,7 @@ import { ThemeProvider } from './context/ThemeContext.tsx' ;
 import { OrgProvider } from './context/orgContext.tsx' ;
 import { AuthProvider } from './context/authContext.tsx'
 import { ProfileProvider } from './context/ProfileContext.tsx'
+import { OneSignalProvider } from './context/oneSignalProvider.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -15,7 +16,9 @@ createRoot(document.getElementById('root')!).render(
         <AuthProvider>
           <ProfileProvider>
             <OrgProvider>
-              <App />
+              <OneSignalProvider> 
+                <App />
+              </OneSignalProvider>
             </OrgProvider>
           </ProfileProvider>
         </AuthProvider>

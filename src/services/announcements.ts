@@ -36,6 +36,18 @@ export async function createAnnouncement(payload: CreateAnnouncementPayload): Pr
     .single();
 
   if (error) throw error;
+
+  // Fire the push — don't let a push failure block the announcement itself
+  try {
+    await supabase.functions.invoke('send-announcement-push', {
+      body: { title: payload.title, content: payload.content, orgId: payload.orgId },
+    });
+    await supabase.from('announcements').update({ push_sent: true }).eq('id', data.id);
+  } catch (pushError) {
+    console.error('Push notification failed to send:', pushError);
+    // announcement still succeeds even if push fails — push_sent stays false
+  }
+
   return data;
 }
 
