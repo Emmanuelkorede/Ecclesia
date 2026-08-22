@@ -57,6 +57,17 @@ export async function closeSession(sessionId: string): Promise<void> {
 // Member self check-in via passcode — validates the code matches an active,
 // non-expired session before inserting. Group-restriction is enforced by
 // RLS on attendance_logs (checked server-side regardless of this check).
+
+function toFriendlyCheckInError(error: any): Error {
+  const message = error?.message ?? '';
+  if (error?.code === '42501' || message.includes('row-level security')) {
+    return new Error("You're not eligible to check in to this event. It may be restricted to a specific group.");
+  }
+  return error instanceof Error ? error : new Error(message || 'Check-in failed.');
+}
+
+
+
 export async function checkInWithCode(passcode: string, userId: string): Promise<AttendanceLog> {
   const { data: session, error: sessionError } = await supabase
     .from('attendance_sessions')
@@ -75,9 +86,10 @@ export async function checkInWithCode(passcode: string, userId: string): Promise
     .select()
     .single();
 
-  if (error) throw error;
+  if (error) throw toFriendlyCheckInError(error);
   return data;
 }
+
 
 // Member self check-in via QR scan
 export async function checkInWithQr(qrToken: string, userId: string): Promise<AttendanceLog> {
@@ -98,7 +110,7 @@ export async function checkInWithQr(qrToken: string, userId: string): Promise<At
     .select()
     .single();
 
-  if (error) throw error;
+  if (error) throw toFriendlyCheckInError(error);
   return data;
 }
 
@@ -130,6 +142,18 @@ export async function getMyAttendanceLogs(userId: string) {
     .select('*, attendance_sessions(event_id, events(title, start_time))')
     .eq('user_id', userId)
     .order('timestamp', { ascending: false });
+
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function getActiveSessionsForOrg(orgId: string) {
+  const { data, error } = await supabase
+    .from('attendance_sessions')
+    .select('*, events!inner(title, org_id, group_id)')
+    .eq('events.org_id', orgId)
+    .eq('status', 'active')
+    .gt('expires_at', new Date().toISOString());
 
   if (error) throw error;
   return data ?? [];
