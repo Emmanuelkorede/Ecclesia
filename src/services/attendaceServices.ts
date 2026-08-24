@@ -13,6 +13,14 @@ interface CreateSessionPayload {
   methodAllowed?: CheckInMethod[];
 }
 
+interface CreateScheduleSessionPayload {
+  scheduleId: string;
+  sessionDate: string; // "2026-08-24"
+  createdBy: string;
+  expiresInMinutes?: number;
+}
+
+
 export async function createAttendanceSession(payload: CreateSessionPayload): Promise<AttendanceSession> {
   const expiresAt = new Date(Date.now() + (payload.expiresInMinutes ?? 15) * 60_000).toISOString();
 
@@ -148,16 +156,36 @@ export async function getMyAttendanceLogs(userId: string) {
 }
 
 export async function getActiveSessionsForOrg(orgId: string) {
-  const { data, error } = await supabase
-    .from('attendance_sessions')
-    .select('*, events!inner(title, org_id, group_id)')
-    .eq('events.org_id', orgId)
-    .eq('status', 'active')
-    .gt('expires_at', new Date().toISOString());
+  const [eventSessions, scheduleSessions] = await Promise.all([
+    supabase
+      .from('attendance_sessions')
+      .select('*, events!inner(title, org_id, group_id)')
+      .eq('events.org_id', orgId)
+      .eq('status', 'active')
+      .gt('expires_at', new Date().toISOString()),
+    supabase
+      .from('attendance_sessions')
+      .select('*, church_schedules!inner(title, org_id, group_id)')
+      .eq('church_schedules.org_id', orgId)
+      .eq('status', 'active')
+      .gt('expires_at', new Date().toISOString()),
+  ]);
 
-  if (error) throw error;
-  return data ?? [];
+  if (eventSessions.error) throw eventSessions.error;
+  if (scheduleSessions.error) throw scheduleSessions.error;
+
+  // Normalize both shapes so downstream code (which reads .events?.title
+  // and .events?.group_id) works regardless of which path a session came from
+  const normalizedEvents = (eventSessions.data ?? []).map((s: any) => ({ ...s, events: s.events }));
+  const normalizedSchedules = (scheduleSessions.data ?? []).map((s: any) => ({
+    ...s,
+    events: { title: s.church_schedules.title, group_id: s.church_schedules.group_id },
+  }));
+
+  return [...normalizedEvents, ...normalizedSchedules];
 }
+
+
 
 export async function hasUserCheckedIn(sessionId: string, userId: string): Promise<boolean> {
   const { data, error } = await supabase
@@ -174,7 +202,6 @@ export async function hasUserCheckedIn(sessionId: string, userId: string): Promi
 export async function getEligibleActiveSessionsForUser(orgId: string, userId: string) {
   const sessions = await getActiveSessionsForOrg(orgId);
 
-  // Get this user's group memberships once, up front
   const { data: userGroups, error } = await supabase
     .from('group_members')
     .select('group_id')
@@ -183,8 +210,6 @@ export async function getEligibleActiveSessionsForUser(orgId: string, userId: st
   if (error) throw error;
   const userGroupIds = new Set((userGroups ?? []).map((g) => g.group_id));
 
-  // Keep sessions where the event has no group restriction, OR the
-  // restriction matches a group this user actually belongs to.
   return sessions.filter((s: any) => {
     const groupId = s.events?.group_id;
     return !groupId || userGroupIds.has(groupId);
@@ -200,6 +225,41 @@ export async function getAnySessionForEvent(eventId: string) {
     .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function getAnySessionForSchedule(scheduleId: string, sessionDate: string) {
+  const { data, error } = await supabase
+    .from('attendance_sessions')
+    .select('*')
+    .eq('schedule_id', scheduleId)
+    .eq('session_date', sessionDate)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data;
+}
+
+
+export async function createScheduleAttendanceSession(payload: CreateScheduleSessionPayload): Promise<AttendanceSession> {
+  const expiresAt = new Date(Date.now() + (payload.expiresInMinutes ?? 15) * 60_000).toISOString();
+
+  const { data, error } = await supabase
+    .from('attendance_sessions')
+    .insert({
+      schedule_id: payload.scheduleId,
+      session_date: payload.sessionDate,
+      passcode: generatePasscode(),
+      qr_token: generateQrToken(),
+      method_allowed: ['code', 'qr', 'manual'],
+      expires_at: expiresAt,
+      status: 'active',
+      created_by: payload.createdBy,
+    })
+    .select()
+    .single();
 
   if (error) throw error;
   return data;

@@ -11,6 +11,7 @@ interface CreateSchedulePayload {
   endTime: string;
   location?: string;
   groupId?: string;
+  isMandatory?: boolean;
 }
 
 
@@ -38,6 +39,7 @@ export async function createSchedule(payload: CreateSchedulePayload): Promise<Sc
       end_time: payload.endTime,
       location: payload.location ?? null,
       group_id: payload.groupId ?? null,
+      is_mandatory: payload.isMandatory ?? false,
     })
     .select()
     .single();
@@ -45,6 +47,7 @@ export async function createSchedule(payload: CreateSchedulePayload): Promise<Sc
   if (error) throw error;
   return data;
 }
+
 
 export async function updateSchedule(
   scheduleId: string,
