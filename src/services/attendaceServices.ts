@@ -190,3 +190,17 @@ export async function getEligibleActiveSessionsForUser(orgId: string, userId: st
     return !groupId || userGroupIds.has(groupId);
   });
 }
+
+
+export async function getAnySessionForEvent(eventId: string) {
+  const { data, error } = await supabase
+    .from('attendance_sessions')
+    .select('*')
+    .eq('event_id', eventId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data;
+}

@@ -9,9 +9,12 @@ interface Props {
   checkedInUserIds: string[];
   eligibleUserIds: Set<string> | null; // null = no group restriction, show everyone
   onCheckedIn?: () => void;
+  readOnly?: boolean;
+
 }
 
-export default function ManualRosterList({ sessionId, checkedInUserIds, eligibleUserIds, onCheckedIn }: Props) {
+export default function ManualRosterList({ sessionId, checkedInUserIds, eligibleUserIds, onCheckedIn , readOnly = false,
+ }: Props) {
   const { members, loading } = useMemberships();
   const { user } = useAuth();
   const [search, setSearch] = useState('');
@@ -59,18 +62,17 @@ export default function ManualRosterList({ sessionId, checkedInUserIds, eligible
             <div key={m.id} className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800">
               <span className="text-sm text-slate-900 dark:text-white">{m.profile?.full_name}</span>
               {alreadyIn ? (
-                <span className="flex items-center gap-1 text-xs text-emerald-600">
-                  <Check className="w-4 h-4" /> Checked in
-                </span>
-              ) : (
-                <button
-                  onClick={() => handleCheckIn(m.user_id)}
-                  disabled={processingId === m.user_id}
-                  className="text-xs font-medium text-indigo-600 hover:underline disabled:opacity-50"
-                >
-                  {processingId === m.user_id ? 'Checking in...' : 'Check in'}
-                </button>
-              )}
+    <span className="flex items-center gap-1 text-xs text-emerald-600">
+      <Check className="w-4 h-4" /> Checked in
+    </span>
+  ) : readOnly ? (
+    <span className="text-xs text-slate-400">Did not attend</span>
+  ) : (
+    <button onClick={() => handleCheckIn(m.user_id)} disabled={processingId === m.user_id} className="text-xs font-medium text-indigo-600 hover:underline disabled:opacity-50">
+      {processingId === m.user_id ? 'Checking in...' : 'Check in'}
+    </button>
+  )}
+
             </div>
           );
         })}

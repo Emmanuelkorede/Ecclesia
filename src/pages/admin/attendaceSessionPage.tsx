@@ -6,24 +6,23 @@ import * as groupService from '../../services/groupServives';
 import QRGenerator from '../../components/attendance/QRgenerator';
 import SessionCountdown from '../../components/attendance/sessionCountDown';
 import ManualRosterList from '../../components/attendance/manualRoasterList';
+import { formatFullDate } from '../../utils/dateHelpers';
 
 export default function AttendanceSessionPage() {
   const { events } = useEvents();
   const [selectedEventId, setSelectedEventId] = useState<string>('');
-  const { session, loading, loadActiveSession, startSession, endSession } = useAttendanceSession(selectedEventId || null);
+  const { session, loading, checkedExisting, loadActiveSession, startSession, endSession } = useAttendanceSession(selectedEventId || null);
   const [checkedInIds, setCheckedInIds] = useState<string[]>([]);
   const [eligibleUserIds, setEligibleUserIds] = useState<Set<string> | null>(null);
 
   const selectedEvent = events.find((e) => e.id === selectedEventId);
 
-  // Auto-restore: if any event already has an active session, jump straight
-  // to it instead of forcing the admin to reselect after navigating away.
   useEffect(() => {
     if (selectedEventId || events.length === 0) return;
     (async () => {
       for (const e of events) {
-        const active = await attendanceService.getActiveSessionForEvent(e.id);
-        if (active) {
+        const any = await attendanceService.getAnySessionForEvent(e.id);
+        if (any?.status === 'active') {
           setSelectedEventId(e.id);
           return;
         }
@@ -35,15 +34,13 @@ export default function AttendanceSessionPage() {
     if (selectedEventId) loadActiveSession();
   }, [selectedEventId, loadActiveSession]);
 
-  // Resolve which members are actually allowed to be manually checked in —
-  // if the event is group-restricted, only that group's members qualify.
   useEffect(() => {
     if (!selectedEvent) {
       setEligibleUserIds(null);
       return;
     }
     if (!selectedEvent.group_id) {
-      setEligibleUserIds(null); // null = no restriction, everyone eligible
+      setEligibleUserIds(null);
       return;
     }
     groupService.getGroupMembers(selectedEvent.group_id).then((members: any[]) => {
@@ -61,7 +58,7 @@ export default function AttendanceSessionPage() {
     if (session) refreshCheckedIn();
   }, [session, refreshCheckedIn]);
 
-  const upcomingEvents = events.filter((e) => new Date(e.end_time) > new Date());
+  const allEvents = events; // show all events, not just future ones — closed sessions need to remain visible for past events too
 
   return (
     <div className="space-y-6 max-w-2xl">
@@ -75,16 +72,16 @@ export default function AttendanceSessionPage() {
           className="w-full max-w-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-transparent px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
         >
           <option value="">Choose an event...</option>
-          {upcomingEvents.map((e) => (
-            <option key={e.id} value={e.id}>{e.title}</option>
+          {allEvents.map((e) => (
+            <option key={e.id} value={e.id}>{e.title} — {formatFullDate(e.start_time)}</option>
           ))}
         </select>
       </div>
 
       {selectedEventId && (
         <>
-          {loading ? (
-            <p className="text-sm text-slate-500">Checking for active session...</p>
+          {loading || !checkedExisting ? (
+            <p className="text-sm text-slate-500">Checking session status...</p>
           ) : !session ? (
             <button
               onClick={() => startSession()}
@@ -92,6 +89,27 @@ export default function AttendanceSessionPage() {
             >
               Start Attendance Session
             </button>
+          ) : session.status === 'closed' ? (
+            <div className="space-y-4">
+              <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl p-5">
+                <p className="text-sm font-medium text-slate-900 dark:text-white">
+                  Attendance already recorded for this event
+                </p>
+                <p className="text-xs text-slate-500 mt-1">
+                  {checkedInIds.length} {checkedInIds.length === 1 ? 'person' : 'people'} checked in
+                </p>
+              </div>
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-5">
+                <h2 className="font-semibold text-slate-900 dark:text-white mb-4">Attendees</h2>
+                <ManualRosterList
+                  sessionId={session.id}
+                  checkedInUserIds={checkedInIds}
+                  eligibleUserIds={eligibleUserIds}
+                  onCheckedIn={refreshCheckedIn}
+                  readOnly
+                />
+              </div>
+            </div>
           ) : (
             <div className="space-y-6">
               <div className="flex items-center gap-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-5">
