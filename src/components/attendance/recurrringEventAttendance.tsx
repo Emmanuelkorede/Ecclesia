@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSchedule } from '../../hooks/useSchedule';
 import { useScheduleAttendance } from '../../hooks/useScheduleAttendance';
+import { useAttendanceRealtime } from '../../hooks/useAttendanceRealtime';
 import * as attendanceService from '../../services/attendaceServices';
 import * as groupService from '../../services/groupServives';
 import QRGenerator from './QRgenerator';
@@ -43,6 +44,8 @@ export default function RecurringAttendance() {
   useEffect(() => {
     if (session) refreshCheckedIn();
   }, [session, refreshCheckedIn]);
+
+  useAttendanceRealtime(session?.id ?? null, refreshCheckedIn);
 
   return (
     <div className="space-y-6">

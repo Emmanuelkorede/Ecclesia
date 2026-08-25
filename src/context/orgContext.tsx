@@ -14,6 +14,34 @@ interface OrgContextType {
 
 const OrgContext = createContext<OrgContextType | undefined>(undefined);
 
+// Pulled out of the component so it isn't recreated on every render,
+// and so loadMemberships can call it from both the success path and
+// the JWT-retry path without duplicating the logic.
+async function applyMemberships(
+  fetchedMemberships: MembershipWithOrg[],
+  persistedActiveOrgId: string | null,
+  userId: string,
+  setMemberships: (m: MembershipWithOrg[]) => void,
+  setActiveOrg: (o: Organization | null) => void,
+  setRole: (r: Role | null) => void,
+  setLoading: (l: boolean) => void
+) {
+  setMemberships(fetchedMemberships);
+
+  const matched =
+    fetchedMemberships.find((m) => m.org_id === persistedActiveOrgId) ??
+    fetchedMemberships[0] ??
+    null;
+
+  setActiveOrg(matched?.organization ?? null);
+  setRole(matched?.role ?? null);
+  setLoading(false);
+
+  if (matched && matched.org_id !== persistedActiveOrgId) {
+    await orgService.setActiveOrgId(userId, matched.org_id);
+  }
+}
+
 export const OrgProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, initialized } = useAuth();
 
@@ -34,30 +62,53 @@ export const OrgProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     setLoading(true);
 
-    const [fetchedMemberships, persistedActiveOrgId] = await Promise.all([
-      orgService.getMembershipsForUser(user.id),
-      orgService.getActiveOrgId(user.id),
-    ]);
+    try {
+      const [fetchedMemberships, persistedActiveOrgId] = await Promise.all([
+        orgService.getMembershipsForUser(user.id),
+        orgService.getActiveOrgId(user.id),
+      ]);
 
-    setMemberships(fetchedMemberships);
+      await applyMemberships(
+        fetchedMemberships,
+        persistedActiveOrgId,
+        user.id,
+        setMemberships,
+        setActiveOrg,
+        setRole,
+        setLoading
+      );
+    } catch (err: any) {
+      // Transient clock-skew/token-timing error, most common on the very
+      // first request of the day right after `npm run dev` — wait briefly
+      // and retry once before giving up.
+      if (err?.code === 'PGRST303') {
+        await new Promise((resolve) => setTimeout(resolve, 800));
 
-    const matched =
-      fetchedMemberships.find((m) => m.org_id === persistedActiveOrgId) ??
-      fetchedMemberships[0] ??
-      null;
+        const [fetchedMemberships, persistedActiveOrgId] = await Promise.all([
+          orgService.getMembershipsForUser(user.id),
+          orgService.getActiveOrgId(user.id),
+        ]);
 
-    setActiveOrg(matched?.organization ?? null);
-    setRole(matched?.role ?? null);
-    setLoading(false);
-
-    if (matched && matched.org_id !== persistedActiveOrgId) {
-      await orgService.setActiveOrgId(user.id, matched.org_id);
+        await applyMemberships(
+          fetchedMemberships,
+          persistedActiveOrgId,
+          user.id,
+          setMemberships,
+          setActiveOrg,
+          setRole,
+          setLoading
+        );
+      } else {
+        setLoading(false);
+        throw err;
+      }
     }
   }, [user?.id]);
 
-  // Same fix as ProfileContext: reset loading synchronously during render
-  // when the user identity changes, so no component can ever read a
-  // stale "loading: false, role: <old value>" combination.
+  // Reset loading synchronously during render when the user identity
+  // changes, so no component can ever read a stale "loading: false,
+  // role: <old value>" combination during the brief window before the
+  // effect below has actually run.
   if (user?.id !== lastUserId) {
     setLastUserId(user?.id);
     setLoading(true);

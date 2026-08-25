@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useEvents } from '../../hooks/useEvents';
 import { useAttendanceSession } from '../../hooks/useAttendanceSession';
+import { useAttendanceRealtime } from '../../hooks/useAttendanceRealtime';
 import * as attendanceService from '../../services/attendaceServices';
 import * as groupService from '../../services/groupServives';
 import QRGenerator from './QRgenerator';
@@ -40,6 +41,10 @@ export default function CustomEventAttendance() {
   useEffect(() => {
     if (session) refreshCheckedIn();
   }, [session, refreshCheckedIn]);
+
+  // Live-updates the roster the instant anyone checks in — self, QR, or
+  // another admin's manual check-in — without needing a page refresh.
+  useAttendanceRealtime(session?.id ?? null, refreshCheckedIn);
 
   return (
     <div className="space-y-6">

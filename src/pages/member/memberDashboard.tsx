@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useActiveOrg } from '../../hooks/useActiveOrg';
 import { useAuth } from '../../hooks/useAuth';
 import { useAnnouncements } from '../../hooks/useAnnoucments';
 import { useEvents } from '../../hooks/useEvents';
+import { useOngoingSessionsRealtime } from '../../hooks/useongoingSessionRealtime';
 import * as attendanceService from '../../services/attendaceServices';
 import { formatRelativeTime, formatFullDate, formatTime } from '../../utils/dateHelpers';
 import { useNavigate } from 'react-router';
@@ -17,10 +18,18 @@ export default function MemberDashboardPage() {
   const [ongoingSessions, setOngoingSessions] = useState<any[]>([]);
   const [alreadyCheckedIn, setAlreadyCheckedIn] = useState(false);
 
+  const refreshOngoing = useCallback(() => {
+    if (!activeOrg || !user) return;
+    attendanceService.getEligibleActiveSessionsForUser(activeOrg.id, user.id).then(setOngoingSessions);
+  }, [activeOrg?.id, user?.id]);
+
   useEffect(() => {
-  if (!activeOrg || !user) return;
-  attendanceService.getEligibleActiveSessionsForUser(activeOrg.id, user.id).then(setOngoingSessions);
-}, [activeOrg?.id, user?.id]);
+    refreshOngoing();
+  }, [refreshOngoing]);
+
+  // Live-updates the "attendance open now" banner the instant an admin
+  // starts (or ends) a session, without needing a refresh.
+  useOngoingSessionsRealtime(activeOrg?.id ?? null, refreshOngoing);
 
   useEffect(() => {
     if (!user || ongoingSessions.length === 0) {
