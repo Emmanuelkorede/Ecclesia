@@ -100,3 +100,27 @@ export async function getActiveOrgId(userId: string): Promise<string | null> {
   if (error) throw error;
   return data.active_org_id;
 }
+
+export async function uploadChurchLogo(orgId: string, file: File): Promise<string> {
+  const fileExt = file.name.split('.').pop();
+  const filePath = `${orgId}/logo.${fileExt}`;
+
+  // upsert: true so re-uploading a new logo overwrites the old file
+  // instead of accumulating orphaned images in the bucket
+  const { error: uploadError } = await supabase.storage
+    .from('church-logos')
+    .upload(filePath, file, { upsert: true });
+
+  if (uploadError) throw uploadError;
+
+  const { data: urlData } = supabase.storage.from('church-logos').getPublicUrl(filePath);
+
+  const { error: updateError } = await supabase
+    .from('organizations')
+    .update({ logo_url: urlData.publicUrl })
+    .eq('id', orgId);
+
+  if (updateError) throw updateError;
+
+  return urlData.publicUrl;
+}

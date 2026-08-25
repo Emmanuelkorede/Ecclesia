@@ -3,6 +3,7 @@ import { useActiveOrg } from '../../hooks/useActiveOrg';
 import { generateSlug } from '../../utils/orgHelpers';
 import { updateOrganization } from '../../services/orgService';
 import { canManageOrgSettings } from '../../utils/permissions';
+import LogoUploader from '../../components/settings/logoUploader';
 
 // Icons & UI
 import { Copy, Check, AlertCircle, Building, KeyRound, Palette, Save } from 'lucide-react';
@@ -188,6 +189,13 @@ export default function SettingsPage() {
               </div>
             </div>
           </div>
+
+          <LogoUploader
+  orgId={activeOrg.id}
+  currentLogoUrl={activeOrg.logo_url}
+  canEdit={canEdit}
+  onUploaded={() => refreshMemberships()}
+/>
 
           {/* Appearance Card */}
           <div className="bg-surface border border-subtle rounded-xl overflow-hidden shadow-sm">
