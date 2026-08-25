@@ -147,7 +147,14 @@ export async function getLogsForSession(sessionId: string) {
 export async function getMyAttendanceLogs(userId: string) {
   const { data, error } = await supabase
     .from('attendance_logs')
-    .select('*, attendance_sessions(event_id, events(title, start_time))')
+    .select(`
+      *,
+      attendance_sessions(
+        event_id, session_date,
+        events(title, start_time),
+        church_schedules(title)
+      )
+    `)
     .eq('user_id', userId)
     .order('timestamp', { ascending: false });
 

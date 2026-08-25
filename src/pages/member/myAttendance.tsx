@@ -9,8 +9,10 @@ interface LogWithSession {
   timestamp: string;
   check_in_method: string;
   attendance_sessions: {
-    event_id: string;
+    event_id: string | null;
+    session_date: string | null;
     events: { title: string; start_time: string } | null;
+    church_schedules: { title: string } | null;
   } | null;
 }
 
@@ -85,21 +87,23 @@ export default function MyAttendancePage() {
         ) : logs.length === 0 ? (
           <p className="px-4 py-6 text-sm text-slate-500">No check-ins yet.</p>
         ) : (
-          logs.map((log) => (
-            <div key={log.id} className="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-700 last:border-0">
-              <div>
-                <p className="text-sm font-medium text-slate-900 dark:text-white">
-                  {log.attendance_sessions?.events?.title ?? 'Event'}
-                </p>
-                <p className="text-xs text-slate-500">
-                  {formatFullDate(log.timestamp)} · {formatTime(log.timestamp)}
-                </p>
+          logs.map((log) => {
+            const session = log.attendance_sessions;
+            const title = session?.events?.title ?? session?.church_schedules?.title ?? 'Event';
+            return (
+              <div key={log.id} className="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-700 last:border-0">
+                <div>
+                  <p className="text-sm font-medium text-slate-900 dark:text-white">{title}</p>
+                  <p className="text-xs text-slate-500">
+                    {formatFullDate(log.timestamp)} · {formatTime(log.timestamp)}
+                  </p>
+                </div>
+                <span className="text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-500 px-2 py-0.5 rounded-full capitalize">
+                  {log.check_in_method}
+                </span>
               </div>
-              <span className="text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-500 px-2 py-0.5 rounded-full capitalize">
-                {log.check_in_method}
-              </span>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
     </div>

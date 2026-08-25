@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useSchedule } from '../../hooks/useSchedule';
+import { useGroups } from '../../hooks/useGoups';
 import { 
   Plus, 
   X, 
@@ -8,7 +9,9 @@ import {
   Clock, 
   MapPin, 
   CalendarDays,
-  AlertCircle
+  AlertCircle,
+  Users,
+  ShieldAlert
 } from 'lucide-react';
 import { Spinner } from '../../components/ui/Spinner';
 
@@ -24,6 +27,7 @@ const DAYS = [
 
 export default function SchedulePage() {
   const { schedules, loading, createSchedule, updateSchedule, deleteSchedule } = useSchedule();
+  const { groups } = useGroups();
   
   // Modal & Form State
   const [showForm, setShowForm] = useState(false);
@@ -35,6 +39,8 @@ export default function SchedulePage() {
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
   const [location, setLocation] = useState('');
+  const [groupId, setGroupId] = useState('');
+  const [isMandatory, setIsMandatory] = useState(false);
   
   // Status State
   const [error, setError] = useState<string | null>(null);
@@ -47,6 +53,8 @@ export default function SchedulePage() {
     setStartTime(''); 
     setEndTime(''); 
     setLocation('');
+    setGroupId('');
+    setIsMandatory(false);
     setShowForm(true);
   };
 
@@ -57,6 +65,8 @@ export default function SchedulePage() {
     setStartTime(s.start_time.slice(0, 5));
     setEndTime(s.end_time.slice(0, 5));
     setLocation(s.location ?? '');
+    setGroupId(s.group_id ?? '');
+    setIsMandatory(s.is_mandatory ?? false);
     setShowForm(true);
   };
 
@@ -65,22 +75,19 @@ export default function SchedulePage() {
     setError(null);
     setSubmitting(true);
     try {
+      const params = {
+        title,
+        dayOfWeek,
+        startTime,
+        endTime,
+        location: location || undefined,
+        groupId: groupId || undefined,
+        isMandatory,
+      };
       if (editingId) {
-        await updateSchedule(editingId, { 
-          title, 
-          dayOfWeek, 
-          startTime, 
-          endTime, 
-          location: location || undefined 
-        });
+        await updateSchedule(editingId, params);
       } else {
-        await createSchedule({ 
-          title, 
-          dayOfWeek, 
-          startTime, 
-          endTime, 
-          location: location || undefined 
-        });
+        await createSchedule(params);
       }
       setShowForm(false);
     } catch (err: unknown) {
@@ -150,7 +157,21 @@ export default function SchedulePage() {
                       className="group flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 px-3.5 bg-surface border border-subtle rounded-xl shadow-sm hover:border-brand-500/40 transition-colors"
                     >
                       <div className="space-y-1">
-                        <h3 className="text-sm font-semibold text-main">{s.title}</h3>
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <h3 className="text-sm font-semibold text-main">{s.title}</h3>
+                          {s.is_mandatory && (
+                            <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold bg-red-500/10 text-red-600 dark:text-red-400 px-1.5 py-0.5 rounded-full">
+                              <ShieldAlert className="w-2.5 h-2.5" />
+                              Mandatory
+                            </span>
+                          )}
+                          {s.group_id && (
+                            <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-muted px-1.5 py-0.5 rounded-full">
+                              <Users className="w-2.5 h-2.5" />
+                              Restricted
+                            </span>
+                          )}
+                        </div>
                         <div className="flex flex-wrap items-center gap-2.5 text-xs font-medium text-muted">
                           <span className="flex items-center gap-1 bg-app px-1.5 py-0.5 rounded border border-subtle">
                             <Clock className="w-3 h-3 text-brand-500" />
@@ -213,7 +234,7 @@ export default function SchedulePage() {
             </div>
 
             {/* Modal Body */}
-            <div className="p-5">
+            <div className="p-5 max-h-[80vh] overflow-y-auto">
               {error && (
                 <div className="flex items-start gap-2 p-3 mb-4 text-xs rounded-lg bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400">
                   <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-red-500" />
@@ -282,6 +303,32 @@ export default function SchedulePage() {
                     className="w-full px-3 py-2 bg-app border border-subtle rounded-lg text-sm text-main focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 transition-all"
                   />
                 </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-main mb-1">
+                    Restrict to Group <span className="text-muted font-normal">(Optional)</span>
+                  </label>
+                  <select 
+                    value={groupId} 
+                    onChange={(e) => setGroupId(e.target.value)}
+                    className="w-full px-3 py-2 bg-app border border-subtle rounded-lg text-sm text-main focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 transition-all appearance-none cursor-pointer"
+                  >
+                    <option value="">Open to everyone</option>
+                    {groups.map((g) => (
+                      <option key={g.id} value={g.id}>{g.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <label className="flex items-center gap-2 text-xs font-medium text-main cursor-pointer select-none">
+                  <input 
+                    type="checkbox" 
+                    checked={isMandatory} 
+                    onChange={(e) => setIsMandatory(e.target.checked)} 
+                    className="rounded border-subtle text-brand-600 focus:ring-brand-500/30 cursor-pointer"
+                  />
+                  Mandatory attendance
+                </label>
                 
                 <div className="pt-2">
                   <button 

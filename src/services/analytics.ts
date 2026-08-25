@@ -6,26 +6,48 @@ export interface AttendanceTrendPoint {
   attendeeCount: number;
 }
 
-// One row per event, with a count of how many people checked in —
-// this is what feeds AttendanceLineChart
 export async function getAttendanceTrend(orgId: string, limit = 12): Promise<AttendanceTrendPoint[]> {
-  const { data, error } = await supabase
-    .from('events')
-    .select('title, start_time, attendance_sessions(attendance_logs(id))')
-    .eq('org_id', orgId)
-    .order('start_time', { ascending: false })
-    .limit(limit);
+  const [eventResults, scheduleResults] = await Promise.all([
+    supabase
+      .from('events')
+      .select('title, start_time, attendance_sessions(attendance_logs(id))')
+      .eq('org_id', orgId)
+      .order('start_time', { ascending: false })
+      .limit(limit),
+    supabase
+      .from('attendance_sessions')
+      .select('session_date, church_schedules!inner(title, org_id), attendance_logs(id)')
+      .eq('church_schedules.org_id', orgId)
+      .not('schedule_id', 'is', null)
+      .order('session_date', { ascending: false })
+      .limit(limit),
+  ]);
 
-  if (error) throw error;
+  if (eventResults.error) throw eventResults.error;
+  if (scheduleResults.error) throw scheduleResults.error;
 
-  return (data ?? []).map((event: any) => ({
+  const fromEvents: AttendanceTrendPoint[] = (eventResults.data ?? []).map((event: any) => ({
     eventTitle: event.title,
     eventDate: event.start_time,
     attendeeCount: (event.attendance_sessions ?? []).reduce(
       (sum: number, session: any) => sum + (session.attendance_logs?.length ?? 0),
       0
     ),
-  })).reverse(); // oldest → newest, better for a line chart's x-axis
+  }));
+
+  const fromSchedules: AttendanceTrendPoint[] = (scheduleResults.data ?? []).map((s: any) => ({
+    eventTitle: s.church_schedules.title,
+    eventDate: s.session_date,
+    attendeeCount: s.attendance_logs?.length ?? 0,
+  }));
+
+  // Merge both sources, sort by date, keep only the most recent `limit` overall
+  const combined = [...fromEvents, ...fromSchedules]
+    .sort((a, b) => new Date(b.eventDate).getTime() - new Date(a.eventDate).getTime())
+    .slice(0, limit)
+    .reverse(); // oldest → newest for the chart
+
+  return combined;
 }
 
 export interface RetentionSummary {
@@ -34,7 +56,6 @@ export interface RetentionSummary {
   inactiveLast30Days: number;
 }
 
-// Active = checked in to at least one event in the last 30 days
 export async function getRetentionSummary(orgId: string): Promise<RetentionSummary> {
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
@@ -46,15 +67,26 @@ export async function getRetentionSummary(orgId: string): Promise<RetentionSumma
 
   if (membersError) throw membersError;
 
-  const { data: recentLogs, error: logsError } = await supabase
-    .from('attendance_logs')
-    .select('user_id, attendance_sessions!inner(event_id, events!inner(org_id))')
-    .gte('timestamp', thirtyDaysAgo)
-    .eq('attendance_sessions.events.org_id', orgId);
+  const [eventLogs, scheduleLogs] = await Promise.all([
+    supabase
+      .from('attendance_logs')
+      .select('user_id, attendance_sessions!inner(event_id, events!inner(org_id))')
+      .gte('timestamp', thirtyDaysAgo)
+      .eq('attendance_sessions.events.org_id', orgId),
+    supabase
+      .from('attendance_logs')
+      .select('user_id, attendance_sessions!inner(schedule_id, church_schedules!inner(org_id))')
+      .gte('timestamp', thirtyDaysAgo)
+      .eq('attendance_sessions.church_schedules.org_id', orgId),
+  ]);
 
-  if (logsError) throw logsError;
+  if (eventLogs.error) throw eventLogs.error;
+  if (scheduleLogs.error) throw scheduleLogs.error;
 
-  const uniqueActiveUsers = new Set((recentLogs ?? []).map((log: any) => log.user_id));
+  const uniqueActiveUsers = new Set([
+    ...(eventLogs.data ?? []).map((log: any) => log.user_id),
+    ...(scheduleLogs.data ?? []).map((log: any) => log.user_id),
+  ]);
   const activeLast30Days = uniqueActiveUsers.size;
 
   return {
@@ -69,24 +101,31 @@ export interface GroupBreakdown {
   attendeeCount: number;
 }
 
-// Attendance count per group, for RetentionBarChart's per-ministry view
 export async function getAttendanceByGroup(orgId: string): Promise<GroupBreakdown[]> {
-  const { data, error } = await supabase
+  const { data: groups, error: groupsError } = await supabase
     .from('groups')
-    .select('name, events(attendance_sessions(attendance_logs(id)))')
+    .select('id, name')
     .eq('org_id', orgId);
 
-  if (error) throw error;
+  if (groupsError) throw groupsError;
 
-  return (data ?? []).map((group: any) => ({
-    groupName: group.name,
-    attendeeCount: (group.events ?? []).reduce(
-      (sum: number, event: any) =>
-        sum + (event.attendance_sessions ?? []).reduce(
-          (s: number, session: any) => s + (session.attendance_logs?.length ?? 0),
-          0
-        ),
-      0
-    ),
-  }));
+  const results: GroupBreakdown[] = [];
+
+  for (const group of groups ?? []) {
+    const [eventLogs, scheduleLogs] = await Promise.all([
+      supabase
+        .from('attendance_logs')
+        .select('id, attendance_sessions!inner(events!inner(group_id))')
+        .eq('attendance_sessions.events.group_id', group.id),
+      supabase
+        .from('attendance_logs')
+        .select('id, attendance_sessions!inner(church_schedules!inner(group_id))')
+        .eq('attendance_sessions.church_schedules.group_id', group.id),
+    ]);
+
+    const count = (eventLogs.data?.length ?? 0) + (scheduleLogs.data?.length ?? 0);
+    results.push({ groupName: group.name, attendeeCount: count });
+  }
+
+  return results;
 }
