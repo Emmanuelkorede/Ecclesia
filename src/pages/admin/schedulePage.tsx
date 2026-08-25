@@ -11,7 +11,8 @@ import {
   CalendarDays,
   AlertCircle,
   Users,
-  ShieldAlert
+  ShieldAlert,
+  AlertTriangle
 } from 'lucide-react';
 import { Spinner } from '../../components/ui/Spinner';
 
@@ -32,6 +33,7 @@ export default function SchedulePage() {
   // Modal & Form State
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [scheduleToDelete, setScheduleToDelete] = useState<string | null>(null);
   
   // Field State
   const [title, setTitle] = useState('');
@@ -96,6 +98,12 @@ export default function SchedulePage() {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const confirmDelete = async () => {
+    if (!scheduleToDelete) return;
+    await deleteSchedule(scheduleToDelete);
+    setScheduleToDelete(null);
   };
 
   const grouped = DAYS.map((day, i) => ({ 
@@ -198,7 +206,7 @@ export default function SchedulePage() {
                         </button>
                         <button 
                           type="button" 
-                          onClick={() => deleteSchedule(s.id)}
+                          onClick={() => setScheduleToDelete(s.id)}
                           className="p-1.5 text-muted hover:text-red-600 hover:bg-red-500/10 rounded-md transition-colors cursor-pointer"
                           title="Delete activity"
                         >
@@ -211,6 +219,35 @@ export default function SchedulePage() {
               )}
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {scheduleToDelete && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/40 dark:bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-surface w-full max-w-sm rounded-xl shadow-2xl border border-subtle p-6 animate-in zoom-in-95 duration-200 text-center">
+            <div className="mx-auto w-12 h-12 flex items-center justify-center rounded-full bg-red-500/10 mb-4 border border-red-500/20">
+              <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-500" />
+            </div>
+            <h3 className="text-lg font-bold text-main mb-2">Delete Activity?</h3>
+            <p className="text-sm text-muted mb-6">
+              Are you sure you want to delete this activity? This action cannot be undone.
+            </p>
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={() => setScheduleToDelete(null)}
+                className="flex-1 px-4 py-2 bg-app border border-subtle hover:bg-subtle rounded-lg text-sm font-semibold text-main transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={confirmDelete}
+                className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 active:bg-red-800 text-white rounded-lg text-sm font-semibold shadow-sm transition-colors cursor-pointer"
+              >
+                Delete Activity
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -233,8 +270,8 @@ export default function SchedulePage() {
               </button>
             </div>
 
-            {/* Modal Body */}
-            <div className="p-5 max-h-[80vh] overflow-y-auto">
+            {/* Modal Body with hidden scrollbar */}
+            <div className="p-5 max-h-[80vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
               {error && (
                 <div className="flex items-start gap-2 p-3 mb-4 text-xs rounded-lg bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400">
                   <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-red-500" />
@@ -306,7 +343,7 @@ export default function SchedulePage() {
 
                 <div>
                   <label className="block text-xs font-medium text-main mb-1">
-                    Restrict to Group <span className="text-muted font-normal">(Optional)</span>
+                    Restrict to group <span className="text-muted font-normal">(Optional)</span>
                   </label>
                   <select 
                     value={groupId} 
@@ -320,21 +357,36 @@ export default function SchedulePage() {
                   </select>
                 </div>
 
-                <label className="flex items-center gap-2 text-xs font-medium text-main cursor-pointer select-none">
-                  <input 
-                    type="checkbox" 
-                    checked={isMandatory} 
-                    onChange={(e) => setIsMandatory(e.target.checked)} 
-                    className="rounded border-subtle text-brand-600 focus:ring-brand-500/30 cursor-pointer"
-                  />
-                  Mandatory attendance
-                </label>
-                
-                <div className="pt-2">
-                  <button 
-                    type="submit" 
+                {/* SaaS Custom Toggle Switch */}
+                <div 
+                  onClick={() => setIsMandatory(!isMandatory)}
+                  className="flex items-center justify-between p-3.5 border border-subtle rounded-xl bg-app cursor-pointer hover:border-brand-500/30 transition-all select-none group"
+                >
+                  <div>
+                    <label className="block text-sm font-medium text-main cursor-pointer group-hover:text-brand-600 transition-colors">
+                      Mandatory Activity
+                    </label>
+                    <p className="text-[11px] text-muted mt-0.5">
+                      Mark this activity as strictly required
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={isMandatory}
+                    className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${isMandatory ? 'bg-brand-600' : 'bg-slate-200 dark:bg-slate-700'}`}
+                  >
+                    <span 
+                      className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isMandatory ? 'translate-x-4' : 'translate-x-0'}`} 
+                    />
+                  </button>
+                </div>
+
+                <div className="pt-3 border-t border-subtle">
+                  <button
+                    type="submit"
                     disabled={submitting}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white text-sm font-semibold rounded-lg shadow-sm transition-all disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white text-sm font-semibold rounded-lg shadow-sm transition-all disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
                   >
                     {submitting ? (
                       <>
@@ -342,7 +394,7 @@ export default function SchedulePage() {
                         <span>Saving...</span>
                       </>
                     ) : (
-                      <span>{editingId ? 'Save Changes' : 'Add Activity'}</span>
+                      <span>{editingId ? 'Save changes' : 'Add activity'}</span>
                     )}
                   </button>
                 </div>
