@@ -5,9 +5,10 @@ import { useAnnouncements } from '../../hooks/useAnnoucments';
 import { useEvents } from '../../hooks/useEvents';
 import { useOngoingSessionsRealtime } from '../../hooks/useongoingSessionRealtime';
 import * as attendanceService from '../../services/attendaceServices';
-import { formatRelativeTime, formatFullDate, formatTime } from '../../utils/dateHelpers';
+import AnnouncementCard from '../../components/annoucements/annoucnemtsCard';
+import { formatFullDate, formatTime } from '../../utils/dateHelpers';
 import { useNavigate } from 'react-router';
-import { CalendarDays, QrCode, Radio, CheckCircle2 } from 'lucide-react';
+import { CalendarDays, QrCode, Radio, CheckCircle2, ChevronRight } from 'lucide-react';
 
 export default function MemberDashboardPage() {
   const { activeOrg } = useActiveOrg();
@@ -27,8 +28,6 @@ export default function MemberDashboardPage() {
     refreshOngoing();
   }, [refreshOngoing]);
 
-  // Live-updates the "attendance open now" banner the instant an admin
-  // starts (or ends) a session, without needing a refresh.
   useOngoingSessionsRealtime(activeOrg?.id ?? null, refreshOngoing);
 
   useEffect(() => {
@@ -43,7 +42,7 @@ export default function MemberDashboardPage() {
     .filter((e) => new Date(e.start_time) > new Date())
     .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime())[0];
 
-  const recentAnnouncements = announcements.slice(0, 3);
+  const recentAnnouncements = announcements.slice(0, 10);
 
   return (
     <div className="space-y-6">
@@ -118,7 +117,17 @@ export default function MemberDashboardPage() {
       </div>
 
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-5">
-        <h2 className="font-semibold text-slate-900 dark:text-white mb-3">Recent Announcements</h2>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="font-semibold text-slate-900 dark:text-white">Recent Announcements</h2>
+          {announcements.length > 10 && (
+            <button
+              onClick={() => navigate('/member/announcements')}
+              className="flex items-center gap-0.5 text-xs font-medium text-indigo-600 hover:underline"
+            >
+              View all <ChevronRight className="w-3 h-3" />
+            </button>
+          )}
+        </div>
         {announcementsLoading ? (
           <p className="text-sm text-slate-500 dark:text-slate-400">Loading...</p>
         ) : recentAnnouncements.length === 0 ? (
@@ -126,17 +135,7 @@ export default function MemberDashboardPage() {
         ) : (
           <div className="space-y-3">
             {recentAnnouncements.map((a) => (
-              <div
-                key={a.id}
-                className="border-t border-slate-200 dark:border-slate-700 pt-3 first:border-0 first:pt-0 cursor-pointer"
-                onClick={() => navigate(`/member/announcements/${a.id}`)}
-              >
-                <p className="text-sm font-medium text-slate-900 dark:text-white">{a.title}</p>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">{a.content}</p>
-                <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
-                  {formatRelativeTime(a.created_at ?? '')}
-                </p>
-              </div>
+              <AnnouncementCard key={a.id} id={a.id} title={a.title} content={a.content} createdAt={a.created_at} />
             ))}
           </div>
         )}

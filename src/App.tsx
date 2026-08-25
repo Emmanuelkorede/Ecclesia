@@ -29,6 +29,7 @@ import SchedulePage from './pages/admin/schedulePage';
 import AnnouncementDetailPage from './pages/member/announcementDetailsPage';
 import MyAttendancePage from './pages/member/myAttendance';
 import ProfilePage from './pages/member/profilePage';
+import MemberAnnouncementsPage from './pages/member/annoucementsPage';
 
 import PaymentApprovalsPage from './pages/platFormOwner/paymentApprovalPage';
 import SaaSOverviewPage from './pages/platFormOwner/saasOverviewPage';
@@ -83,6 +84,7 @@ function App() {
           <Route path='/member/check-in' element={<CheckInPage />} />
           <Route path='/member/sermons' element={<ScheduleSermonsPage />} />
           <Route path='/member/announcements/:id' element={<AnnouncementDetailPage />} />
+          <Route path='/member/announcements' element={<MemberAnnouncementsPage />} />
           <Route path='/member/attendance' element={<MyAttendancePage />} />
           <Route path='/member/profile' element={<ProfilePage />} />
         </Route>
