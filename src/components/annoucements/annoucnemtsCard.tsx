@@ -13,12 +13,18 @@ export default function AnnouncementCard({ id, title, content, createdAt }: Prop
 
   return (
     <div
-      className="border-t border-slate-200 dark:border-slate-700 pt-3 first:border-0 first:pt-0 cursor-pointer"
       onClick={() => navigate(`/member/announcements/${id}`)}
+      className="group p-4 bg-surface border border-subtle rounded-xl shadow-sm hover:border-brand-500/40 transition-all cursor-pointer space-y-1.5"
     >
-      <p className="text-sm font-medium text-slate-900 dark:text-white">{title}</p>
-      <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-2">{content}</p>
-      <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">{formatRelativeTime(createdAt ?? '')}</p>
+      <h3 className="text-base font-semibold text-main group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
+        {title}
+      </h3>
+      <p className="text-sm text-muted line-clamp-2 leading-relaxed">
+        {content}
+      </p>
+      <p className="text-xs font-medium text-muted pt-1">
+        Posted {formatRelativeTime(createdAt ?? '')}
+      </p>
     </div>
   );
 }

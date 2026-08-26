@@ -1,18 +1,17 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useSchedule } from '../../hooks/useSchedule';
 import { useGroups } from '../../hooks/useGoups';
 import { 
   Plus, 
   X, 
-  Trash2, 
-  Pencil, 
-  Clock, 
   MapPin, 
-  CalendarDays,
-  AlertCircle,
-  Users,
-  ShieldAlert,
-  AlertTriangle
+  Users, 
+  AlertCircle, 
+  CalendarDays, 
+  Trash2, 
+  Clock, 
+  AlertTriangle,
+  ShieldAlert
 } from 'lucide-react';
 import { Spinner } from '../../components/ui/Spinner';
 
@@ -27,57 +26,34 @@ const DAYS = [
 ];
 
 export default function SchedulePage() {
-  const { schedules, loading, createSchedule, updateSchedule, deleteSchedule } = useSchedule();
+  const { schedules, loading, createSchedule, deleteSchedule } = useSchedule();
   const { groups } = useGroups();
-  
+
   // Modal & Form State
   const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [scheduleToDelete, setScheduleToDelete] = useState<string | null>(null);
-  
-  // Field State
+  const [itemToDelete, setItemToDelete] = useState<string | null>(null);
+
+  // Form Fields
   const [title, setTitle] = useState('');
-  const [dayOfWeek, setDayOfWeek] = useState(0);
+  const [dayOfWeek, setDayOfWeek] = useState<number>(0);
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
   const [location, setLocation] = useState('');
   const [groupId, setGroupId] = useState('');
   const [isMandatory, setIsMandatory] = useState(false);
-  
+
   // Status State
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const openCreate = () => {
-    setEditingId(null);
-    setTitle(''); 
-    setDayOfWeek(0); 
-    setStartTime(''); 
-    setEndTime(''); 
-    setLocation('');
-    setGroupId('');
-    setIsMandatory(false);
-    setShowForm(true);
-  };
-
-  const openEdit = (s: (typeof schedules)[number]) => {
-    setEditingId(s.id);
-    setTitle(s.title);
-    setDayOfWeek(s.day_of_week);
-    setStartTime(s.start_time.slice(0, 5));
-    setEndTime(s.end_time.slice(0, 5));
-    setLocation(s.location ?? '');
-    setGroupId(s.group_id ?? '');
-    setIsMandatory(s.is_mandatory ?? false);
-    setShowForm(true);
-  };
+  const currentDayIndex = new Date().getDay();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setSubmitting(true);
     try {
-      const params = {
+      await createSchedule({
         title,
         dayOfWeek,
         startTime,
@@ -85,15 +61,16 @@ export default function SchedulePage() {
         location: location || undefined,
         groupId: groupId || undefined,
         isMandatory,
-      };
-      if (editingId) {
-        await updateSchedule(editingId, params);
-      } else {
-        await createSchedule(params);
-      }
+      });
+      setTitle('');
+      setStartTime('');
+      setEndTime('');
+      setLocation('');
+      setGroupId('');
+      setIsMandatory(false);
       setShowForm(false);
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'An error occurred saving the schedule.';
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create schedule item.';
       setError(errorMessage);
     } finally {
       setSubmitting(false);
@@ -101,13 +78,14 @@ export default function SchedulePage() {
   };
 
   const confirmDelete = async () => {
-    if (!scheduleToDelete) return;
-    await deleteSchedule(scheduleToDelete);
-    setScheduleToDelete(null);
+    if (!itemToDelete) return;
+    await deleteSchedule(itemToDelete);
+    setItemToDelete(null);
   };
 
   const grouped = DAYS.map((day, i) => ({ 
     day, 
+    isToday: i === currentDayIndex,
     items: schedules.filter((s) => s.day_of_week === i) 
   }));
 
@@ -117,22 +95,22 @@ export default function SchedulePage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-main tracking-tight">Weekly Schedule</h1>
+          <h1 className="text-2xl font-bold text-main tracking-tight">Schedule Management</h1>
           <p className="text-muted mt-1 text-sm">
-            Manage recurring weekly activities and services.
+            Create and update recurring weekly schedules and activities.
           </p>
         </div>
-        <button 
-          type="button" 
-          onClick={openCreate}
+        <button
+          type="button"
+          onClick={() => setShowForm(true)}
           className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white text-sm font-semibold rounded-lg shadow-sm transition-all cursor-pointer"
         >
           <Plus className="w-4 h-4" />
-          <span>Add Activity</span>
+          <span>New Schedule</span>
         </button>
       </div>
 
-      {/* Main Content Area */}
+      {/* Main Grid */}
       {loading ? (
         <div className="flex flex-col items-center justify-center py-16 text-muted">
           <Spinner size="md" className="text-brand-500 mb-3" />
@@ -140,19 +118,33 @@ export default function SchedulePage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-6">
-          {grouped.map(({ day, items }) => (
-            <div key={day} className="space-y-3">
+          {grouped.map(({ day, isToday, items }) => (
+            <div 
+              key={day} 
+              className={`space-y-3 transition-all ${
+                isToday 
+                  ? 'p-3.5 rounded-2xl bg-brand-500/5 border border-brand-500/20' 
+                  : ''
+              }`}
+            >
               
               {/* Day Header */}
               <div className="flex items-center gap-2 pb-1.5 border-b border-subtle">
-                <CalendarDays className="w-4 h-4 text-brand-500" />
-                <h2 className="text-base font-semibold text-main">{day}</h2>
-                <span className="ml-auto text-xs font-medium px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-muted">
+                <CalendarDays className={`w-4 h-4 ${isToday ? 'text-brand-600' : 'text-brand-500'}`} />
+                <h2 className="text-base font-semibold text-main flex items-center gap-2">
+                  {day}
+                  {isToday && (
+                    <span className="text-[10px] font-bold uppercase tracking-wider bg-brand-600 text-white px-2 py-0.5 rounded">
+                      Today
+                    </span>
+                  )}
+                </h2>
+                <span className="ml-auto text-xs font-medium px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-muted">
                   {items.length}
                 </span>
               </div>
 
-              {/* Day Activities List */}
+              {/* Items List */}
               {items.length === 0 ? (
                 <div className="py-4 px-3 text-center rounded-xl border border-dashed border-subtle bg-surface/50">
                   <p className="text-xs text-muted">No activities scheduled</p>
@@ -162,57 +154,51 @@ export default function SchedulePage() {
                   {items.map((s) => (
                     <div 
                       key={s.id}
-                      className="group flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 px-3.5 bg-surface border border-subtle rounded-xl shadow-sm hover:border-brand-500/40 transition-colors"
+                      className="group flex items-center justify-between gap-3 p-3.5 bg-surface border border-subtle rounded-xl shadow-sm hover:border-brand-500/40 transition-colors"
                     >
-                      <div className="space-y-1">
-                        <div className="flex flex-wrap items-center gap-1.5">
-                          <h3 className="text-sm font-semibold text-main">{s.title}</h3>
+                      <div className="space-y-1.5 min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h3 className="text-sm font-semibold text-main truncate">{s.title}</h3>
+                          
                           {s.is_mandatory && (
-                            <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold bg-red-500/10 text-red-600 dark:text-red-400 px-1.5 py-0.5 rounded-full">
-                              <ShieldAlert className="w-2.5 h-2.5" />
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20">
+                              <ShieldAlert className="w-3 h-3" />
                               Mandatory
                             </span>
                           )}
+
                           {s.group_id && (
-                            <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-muted px-1.5 py-0.5 rounded-full">
-                              <Users className="w-2.5 h-2.5" />
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded bg-brand-soft text-brand-600 border border-brand-500/20">
+                              <Users className="w-3 h-3" />
                               Restricted
                             </span>
                           )}
                         </div>
+
                         <div className="flex flex-wrap items-center gap-2.5 text-xs font-medium text-muted">
-                          <span className="flex items-center gap-1 bg-app px-1.5 py-0.5 rounded border border-subtle">
+                          <span className="flex items-center gap-1 bg-app px-2 py-0.5 rounded border border-subtle">
                             <Clock className="w-3 h-3 text-brand-500" />
                             {s.start_time.slice(0, 5)} - {s.end_time.slice(0, 5)}
                           </span>
+
                           {s.location && (
                             <span className="flex items-center gap-1">
-                              <MapPin className="w-3 h-3" />
+                              <MapPin className="w-3 h-3 text-muted" />
                               <span className="truncate max-w-[140px]">{s.location}</span>
                             </span>
                           )}
                         </div>
                       </div>
-                      
-                      {/* Actions */}
-                      <div className="flex items-center gap-0.5 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-                        <button 
-                          type="button" 
-                          onClick={() => openEdit(s)}
-                          className="p-1.5 text-muted hover:text-brand-600 hover:bg-brand-500/10 rounded-md transition-colors cursor-pointer"
-                          title="Edit activity"
-                        >
-                          <Pencil className="w-3.5 h-3.5" />
-                        </button>
-                        <button 
-                          type="button" 
-                          onClick={() => setScheduleToDelete(s.id)}
-                          className="p-1.5 text-muted hover:text-red-600 hover:bg-red-500/10 rounded-md transition-colors cursor-pointer"
-                          title="Delete activity"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
+
+                      {/* Delete Action */}
+                      <button
+                        type="button"
+                        onClick={() => setItemToDelete(s.id)}
+                        className="p-1.5 text-muted hover:text-red-600 hover:bg-red-500/10 rounded-lg transition-colors cursor-pointer shrink-0 sm:opacity-0 sm:group-hover:opacity-100"
+                        title="Delete schedule item"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
                   ))}
                 </div>
@@ -223,19 +209,19 @@ export default function SchedulePage() {
       )}
 
       {/* Delete Confirmation Modal */}
-      {scheduleToDelete && (
+      {itemToDelete && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/40 dark:bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-surface w-full max-w-sm rounded-xl shadow-2xl border border-subtle p-6 animate-in zoom-in-95 duration-200 text-center">
             <div className="mx-auto w-12 h-12 flex items-center justify-center rounded-full bg-red-500/10 mb-4 border border-red-500/20">
               <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-500" />
             </div>
-            <h3 className="text-lg font-bold text-main mb-2">Delete Activity?</h3>
+            <h3 className="text-lg font-bold text-main mb-2">Delete Schedule Item?</h3>
             <p className="text-sm text-muted mb-6">
-              Are you sure you want to delete this activity? This action cannot be undone.
+              Are you sure you want to remove this schedule entry? This action cannot be undone.
             </p>
             <div className="flex items-center gap-3">
               <button 
-                onClick={() => setScheduleToDelete(null)}
+                onClick={() => setItemToDelete(null)}
                 className="flex-1 px-4 py-2 bg-app border border-subtle hover:bg-subtle rounded-lg text-sm font-semibold text-main transition-colors cursor-pointer"
               >
                 Cancel
@@ -244,25 +230,23 @@ export default function SchedulePage() {
                 onClick={confirmDelete}
                 className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 active:bg-red-800 text-white rounded-lg text-sm font-semibold shadow-sm transition-colors cursor-pointer"
               >
-                Delete Activity
+                Delete
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Modal Overlay for Add/Edit */}
+      {/* Modal Overlay for Create Schedule */}
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 dark:bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-surface w-full max-w-sm rounded-xl shadow-xl border border-subtle overflow-hidden animate-in zoom-in-95 duration-200">
             
             {/* Modal Header */}
-            <div className="flex items-center justify-between px-5 py-3.5 border-b border-subtle bg-app/50">
-              <h2 className="text-base font-semibold text-main">
-                {editingId ? 'Edit Activity' : 'Add Activity'}
-              </h2>
-              <button 
-                type="button" 
+            <div className="flex items-center justify-between px-5 py-4 border-b border-subtle bg-app/50">
+              <h2 className="text-base font-semibold text-main">New Schedule Entry</h2>
+              <button
+                type="button"
                 onClick={() => setShowForm(false)}
                 className="p-1.5 text-muted hover:text-main hover:bg-surface rounded-lg transition-colors cursor-pointer"
               >
@@ -270,83 +254,83 @@ export default function SchedulePage() {
               </button>
             </div>
 
-            {/* Modal Body with hidden scrollbar */}
-            <div className="p-5 max-h-[80vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            {/* Modal Body */}
+            <div className="p-5 overflow-y-auto max-h-[80vh] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
               {error && (
-                <div className="flex items-start gap-2 p-3 mb-4 text-xs rounded-lg bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400">
+                <div className="flex items-start gap-2 p-3 mb-5 text-xs rounded-lg bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400">
                   <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-red-500" />
                   <span className="leading-snug">{error}</span>
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
-                  <label className="block text-xs font-medium text-main mb-1">Activity Title</label>
-                  <input 
-                    type="text" 
-                    required 
-                    value={title} 
-                    onChange={(e) => setTitle(e.target.value)} 
-                    placeholder="e.g. Sunday Service"
+                  <label className="block text-xs font-medium text-main mb-1.5">Activity Title</label>
+                  <input
+                    type="text"
+                    required
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="e.g. Mid-Week Choir Practice"
                     className="w-full px-3 py-2 bg-app border border-subtle rounded-lg text-sm text-main focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 transition-all"
                   />
                 </div>
-                
+
                 <div>
-                  <label className="block text-xs font-medium text-main mb-1">Day of the Week</label>
-                  <select 
-                    value={dayOfWeek} 
+                  <label className="block text-xs font-medium text-main mb-1.5">Day of the Week</label>
+                  <select
+                    value={dayOfWeek}
                     onChange={(e) => setDayOfWeek(Number(e.target.value))}
                     className="w-full px-3 py-2 bg-app border border-subtle rounded-lg text-sm text-main focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 transition-all appearance-none cursor-pointer"
                   >
-                    {DAYS.map((d, i) => (
-                      <option key={d} value={i}>{d}</option>
+                    {DAYS.map((day, idx) => (
+                      <option key={day} value={idx}>{day}</option>
                     ))}
                   </select>
                 </div>
-                
-                <div className="grid grid-cols-2 gap-3">
+
+                <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-medium text-main mb-1">Start Time</label>
-                    <input 
-                      type="time" 
-                      required 
-                      value={startTime} 
-                      onChange={(e) => setStartTime(e.target.value)} 
+                    <label className="block text-xs font-medium text-main mb-1.5">Start Time</label>
+                    <input
+                      type="time"
+                      required
+                      value={startTime}
+                      onChange={(e) => setStartTime(e.target.value)}
                       className="w-full px-3 py-2 bg-app border border-subtle rounded-lg text-sm text-main focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 transition-all cursor-pointer"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-main mb-1">End Time</label>
-                    <input 
-                      type="time" 
-                      required 
-                      value={endTime} 
-                      onChange={(e) => setEndTime(e.target.value)} 
+                    <label className="block text-xs font-medium text-main mb-1.5">End Time</label>
+                    <input
+                      type="time"
+                      required
+                      value={endTime}
+                      onChange={(e) => setEndTime(e.target.value)}
                       className="w-full px-3 py-2 bg-app border border-subtle rounded-lg text-sm text-main focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 transition-all cursor-pointer"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-main mb-1">
-                    Location <span className="text-muted font-normal">(Optional)</span>
+                  <label className="block text-xs font-medium text-main mb-1.5">
+                    Location <span className="text-muted font-normal">(optional)</span>
                   </label>
-                  <input 
-                    type="text" 
-                    value={location} 
-                    onChange={(e) => setLocation(e.target.value)} 
-                    placeholder="e.g. Main Sanctuary"
+                  <input
+                    type="text"
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    placeholder="e.g. Choir Room"
                     className="w-full px-3 py-2 bg-app border border-subtle rounded-lg text-sm text-main focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 transition-all"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-main mb-1">
-                    Restrict to group <span className="text-muted font-normal">(Optional)</span>
+                  <label className="block text-xs font-medium text-main mb-1.5">
+                    Restrict to group <span className="text-muted font-normal">(optional)</span>
                   </label>
-                  <select 
-                    value={groupId} 
+                  <select
+                    value={groupId}
                     onChange={(e) => setGroupId(e.target.value)}
                     className="w-full px-3 py-2 bg-app border border-subtle rounded-lg text-sm text-main focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 transition-all appearance-none cursor-pointer"
                   >
@@ -367,7 +351,7 @@ export default function SchedulePage() {
                       Mandatory Activity
                     </label>
                     <p className="text-[11px] text-muted mt-0.5">
-                      Mark this activity as strictly required
+                      Mark this activity as strictly required for attendees
                     </p>
                   </div>
                   <button
@@ -391,10 +375,10 @@ export default function SchedulePage() {
                     {submitting ? (
                       <>
                         <Spinner size="sm" className="text-white" />
-                        <span>Saving...</span>
+                        <span>Creating schedule...</span>
                       </>
                     ) : (
-                      <span>{editingId ? 'Save changes' : 'Add activity'}</span>
+                      <span>Save Schedule Entry</span>
                     )}
                   </button>
                 </div>
