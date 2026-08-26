@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useActiveOrg } from './useActiveOrg';
-import * as subscriptionService from '../services/subscriptionservies';
+import * as subscriptionService from '../services/subscriptionServices';
 import type { Database } from '../types/database.types';
 
 type Subscription = Database['public']['Tables']['subscriptions']['Row'];

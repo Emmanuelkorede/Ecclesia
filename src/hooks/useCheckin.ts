@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from './useAuth';
-import * as attendanceService from '../services/attendaceServices';
+import * as attendanceService from '../services/attendanceServices';
 
 // Member-facing check-in actions — separate from useAttendanceSession
 // (which is the admin-facing session generator/manager)

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
-import * as subscriptionService from '../../services/subscriptionservies';
+import * as subscriptionService from '../../services/subscriptionServices';
 import { formatCurrency, formatEnumLabel } from '../../utils/formatters';
 import { formatFullDate } from '../../utils/dateHelpers';
 import { X, Maximize2 } from 'lucide-react';

@@ -5,7 +5,7 @@ import GroupMembersModal from '../../components/groups/groupMembersModal';
 import PlanLimitBanner from '../../components/billing/planLimitBanner';
 import { Plus, X, AlertCircle } from 'lucide-react';
 import { Spinner } from '../../components/ui/Spinner';
-import type { GroupWithDetails } from '../../services/groupServives';
+import type { GroupWithDetails } from '../../services/groupServices';
 
 export default function GroupsPage() {
   const { groups, loading, createGroup, updateGroup, deleteGroup } = useGroups();

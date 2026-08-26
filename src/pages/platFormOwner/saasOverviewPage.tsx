@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import * as subscriptionService from '../../services/subscriptionservies';
+import * as subscriptionService from '../../services/subscriptionServices';
 import { formatCurrency, formatEnumLabel } from '../../utils/formatters';
 import { Building2, DollarSign, PieChart } from 'lucide-react';
-import type { SaaSOverviewStats } from '../../services/subscriptionservies';
+import type { SaaSOverviewStats } from '../../services/subscriptionServices';
 
 export default function SaaSOverviewPage() {
   const [stats, setStats] = useState<SaaSOverviewStats | null>(null);

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import * as subscriptionService from '../../services/subscriptionservies';
+import * as subscriptionService from '../../services/subscriptionServices';
 import ReceiptReviewModal from '../../components/billing/receiptReviewModal';
 import { formatCurrency, formatEnumLabel } from '../../utils/formatters';
 import { formatRelativeTime } from '../../utils/dateHelpers';

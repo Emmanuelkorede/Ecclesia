@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useActiveOrg } from './useActiveOrg';
 import { useSubscription } from './useSubscirptionservcies';
-import * as eventService from '../services/eventServies';
+import * as eventService from '../services/eventServices';
 import { isAtMonthlyEventLimit, getPlanLimits, getEffectivePlanForLimits } from '../utils/planLimits';
 import type { Database } from '../types/database.types';
 

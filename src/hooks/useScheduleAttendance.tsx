@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useAuth } from './useAuth';
-import * as attendanceService from '../services/attendaceServices';
+import * as attendanceService from '../services/attendanceServices';
 import type { Database } from '../types/database.types';
 
 type AttendanceSession = Database['public']['Tables']['attendance_sessions']['Row'];

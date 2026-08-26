@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useActiveOrg } from '../../hooks/useActiveOrg';
-import * as attendanceService from '../../services/attendaceServices';
+import * as attendanceService from '../../services/attendanceServices';
 import CodeEntryForm from '../../components/attendance/codeEntryForm';
 import QRScanner from '../../components/attendance/QRscanner';
 import { useNavigate } from 'react-router';

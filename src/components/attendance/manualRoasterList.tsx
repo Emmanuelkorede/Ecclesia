@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useMemberships } from '../../hooks/useMemberShip';
 import { useAuth } from '../../hooks/useAuth';
-import * as attendanceService from '../../services/attendaceServices';
+import * as attendanceService from '../../services/attendanceServices';
 import { Check, Search, UserCheck, UserX, AlertCircle } from 'lucide-react';
 import { Spinner } from '../../components/ui/Spinner';
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
-import * as attendanceService from '../../services/attendaceServices';
+import * as attendanceService from '../../services/attendanceServices';
 import { formatFullDate, formatTime } from '../../utils/dateHelpers';
 import { CheckCircle2, Flame, TrendingUp } from 'lucide-react';
 

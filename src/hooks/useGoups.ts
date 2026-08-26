@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useActiveOrg } from './useActiveOrg';
 import { useSubscription } from './useSubscirptionservcies';
-import * as groupService from '../services/groupServives';
-import type { GroupWithDetails } from '../services/groupServives';
+import * as groupService from '../services/groupServices';
+import type { GroupWithDetails } from '../services/groupServices';
 import { isAtGroupLimit, getPlanLimits, getEffectivePlanForLimits } from '../utils/planLimits';
 import type { Database } from '../types/database.types';
 

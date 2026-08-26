@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useMemberships } from './useMemberShip';
-import * as groupService from '../services/groupServives';
+import * as groupService from '../services/groupServices';
 
 export function useGroupMembers(groupId: string | null) {
   const { members: allMembers } = useMemberships(); // full church roster, for the "add" picker
