@@ -8,13 +8,12 @@ import { Users, Layers, CalendarDays, TrendingUp } from 'lucide-react';
 
 export default function DashboardPage() {
   const { activeOrg } = useActiveOrg();
-  const { trend, retention, loading: analyticsLoading } = useAnalytics();
+  const { recurringTrend, retention, loading: analyticsLoading } = useAnalytics();
   const { members } = useMemberships();
   const { groups } = useGroups();
   const { events } = useEvents();
 
   const activeMembers = members.filter((m) => m.status === 'active').length;
-  const pendingMembers = members.filter((m) => m.status === 'pending').length;
   const upcomingEvents = events.filter((e) => new Date(e.start_time) > new Date()).length;
 
   const stats = [
@@ -37,12 +36,6 @@ export default function DashboardPage() {
           </p>
         </div>
       </div>
-
-      {pendingMembers > 0 && (
-        <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 rounded-xl px-4 py-3 text-sm text-amber-700 dark:text-amber-300">
-          You have <strong>{pendingMembers}</strong> pending member{pendingMembers > 1 ? 's' : ''} awaiting approval.
-        </div>
-      )}
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map(({ label, value, icon: Icon, color }) => (
@@ -70,7 +63,9 @@ export default function DashboardPage() {
         {analyticsLoading ? (
           <p className="text-sm text-[var(--text-muted)]">Loading...</p>
         ) : (
-          <AttendanceLineChart data={trend} />
+          <AttendanceLineChart
+            data={recurringTrend.map((p) => ({ eventTitle: p.label, eventDate: p.date, attendeeCount: p.attendeeCount }))}
+          />
         )}
       </div>
     </div>

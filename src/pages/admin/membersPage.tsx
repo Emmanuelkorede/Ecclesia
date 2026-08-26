@@ -4,120 +4,228 @@ import { useActiveOrg } from '../../hooks/useActiveOrg';
 import PlanLimitBanner from '../../components/billing/planLimitBanner';
 import { isSuperAdmin } from '../../utils/permissions';
 import { formatEnumLabel } from '../../utils/formatters';
-import { Check, X } from 'lucide-react';
+import { Spinner } from '../../components/ui/Spinner';
+import { 
+  X, 
+  Search, 
+  AlertCircle, 
+  UserX,
+  Shield,
+} from 'lucide-react';
+
+interface Profile {
+  full_name?: string | null;
+}
+
+interface Member {
+  id: string;
+  user_id: string;
+  role: 'member' | 'sub_admin' | 'super_admin' | string;
+  status: 'active' | 'suspended' | string;
+  profile?: Profile | null;
+}
 
 export default function MembersPage() {
   const { members, loading, updateRole, updateStatus } = useMemberships();
   const { role } = useActiveOrg();
   const [search, setSearch] = useState('');
   const [actionError, setActionError] = useState<string | null>(null);
+  const [processingId, setProcessingId] = useState<string | null>(null);
 
-  const filtered = members.filter((m: any) =>
+  const typedMembers = (members as Member[]) || [];
+
+  const filtered = typedMembers.filter((m) =>
     m.profile?.full_name?.toLowerCase().includes(search.toLowerCase())
   );
 
-  const handleApprove = async (membershipId: string) => {
+  const handleSuspend = async (membershipId: string) => {
     setActionError(null);
+    setProcessingId(membershipId);
     try {
-      await updateStatus(membershipId, 'active');
-    } catch (err: any) {
-      setActionError(err.message);
+      await updateStatus(membershipId, 'suspended');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to suspend member.';
+      setActionError(errorMessage);
+    } finally {
+      setProcessingId(null);
     }
   };
 
+  const handleRoleChange = async (membershipId: string, newRole: string) => {
+    setActionError(null);
+    setProcessingId(membershipId);
+    try {
+      await updateRole(membershipId, newRole);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update role.';
+      setActionError(errorMessage);
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  const getInitials = (name?: string | null) => {
+    return name ? name.charAt(0).toUpperCase() : '?';
+  };
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-[var(--text-main)]">Members</h1>
+    <div className="max-w-6xl mx-auto w-full space-y-6 animate-in fade-in duration-300 pb-12">
+      
+      {/* Page Header */}
+      <div className="space-y-1">
+        <h1 className="text-2xl font-bold text-main tracking-tight">Members</h1>
+        <p className="text-sm text-muted">
+          Manage your organization's members, assign roles, and handle access control.
+        </p>
       </div>
 
-      <PlanLimitBanner currentCount={members.filter((m) => m.status === 'active').length} metric="members" />
-
-      {actionError && (
-        <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-xl px-4 py-3 text-sm text-red-700 dark:text-red-300">
-          {actionError}
-        </div>
-      )}
-
-      <input
-        type="text"
-        placeholder="Search members..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="w-full max-w-sm rounded-lg border border-[var(--border-subtle)] bg-transparent px-3 py-2 text-sm text-[var(--text-main)] focus:outline-none focus:ring-2 focus:ring-brand-500"
+      <PlanLimitBanner 
+        currentCount={typedMembers.filter((m) => m.status === 'active').length} 
+        metric="members" 
       />
 
-      {loading ? (
-        <p className="text-sm text-[var(--text-muted)]">Loading members...</p>
-      ) : (
-        <div className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-slate-50 dark:bg-slate-800/50 text-[var(--text-muted)]">
-              <tr>
-                <th className="text-left px-4 py-3 font-medium">Name</th>
-                <th className="text-left px-4 py-3 font-medium">Role</th>
-                <th className="text-left px-4 py-3 font-medium">Status</th>
-                <th className="text-right px-4 py-3 font-medium">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((m: any) => (
-                <tr key={m.id} className="border-t border-[var(--border-subtle)]">
-                  <td className="px-4 py-3 text-[var(--text-main)]">{m.profile?.full_name}</td>
-                  <td className="px-4 py-3">
-                    {isSuperAdmin(role) ? (
-                      <select
-                        value={m.role}
-                        onChange={(e) => updateRole(m.id, e.target.value as any)}
-                        className="bg-transparent border border-[var(--border-subtle)] rounded-md px-2 py-1 text-xs text-[var(--text-main)]"
-                      >
-                        <option value="member">Member</option>
-                        <option value="sub_admin">Sub Admin</option>
-                        <option value="super_admin">Super Admin</option>
-                      </select>
-                    ) : (
-                      <span className="text-[var(--text-muted)]">{formatEnumLabel(m.role)}</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                        m.status === 'active'
-                          ? 'bg-accent-50 dark:bg-accent-950/40 text-accent-700 dark:text-accent-400'
-                          : m.status === 'pending'
-                          ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400'
-                          : 'bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-400'
-                      }`}
-                    >
-                      {formatEnumLabel(m.status)}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    {m.status === 'pending' && (
-                      <div className="flex gap-2 justify-end">
-                        <button
-                          onClick={() => handleApprove(m.id)}
-                          className="p-1.5 rounded-lg bg-accent-50 dark:bg-accent-950/40 text-accent-600"
-                          aria-label="Approve"
-                        >
-                          <Check className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => updateStatus(m.id, 'suspended')}
-                          className="p-1.5 rounded-lg bg-red-50 dark:bg-red-950/40 text-red-600"
-                          aria-label="Reject"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {/* Error Alert */}
+      {actionError && (
+        <div className="flex items-start gap-3 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400">
+          <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+          <div className="text-sm font-medium leading-relaxed">
+            {actionError}
+          </div>
+          <button 
+            onClick={() => setActionError(null)}
+            className="ml-auto p-1 rounded-md hover:bg-red-500/20 transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
       )}
+
+      {/* Toolbar */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="relative w-full sm:max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
+          <input
+            type="text"
+            placeholder="Search members by name..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full pl-9 pr-4 py-2 bg-surface border border-subtle rounded-lg text-sm font-medium text-main focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 transition-all placeholder:text-muted"
+          />
+        </div>
+        <div className="w-full sm:w-auto text-sm text-muted font-medium bg-surface border border-subtle px-4 py-2 rounded-lg text-center shadow-sm">
+          Total Members: <span className="text-main font-bold">{typedMembers.length}</span>
+        </div>
+      </div>
+
+      {/* Members Table */}
+      <div className="bg-surface border border-subtle rounded-xl shadow-sm overflow-hidden">
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-16 text-muted">
+            <Spinner size="md" className="text-brand-500 mb-3" />
+            <span className="text-sm font-medium">Loading members...</span>
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="text-center py-12 px-4">
+            <div className="w-12 h-12 rounded-full bg-app flex items-center justify-center mx-auto mb-3">
+              <Search className="w-5 h-5 text-muted" />
+            </div>
+            <h3 className="text-sm font-semibold text-main">No members found</h3>
+            <p className="text-xs text-muted mt-1">Try adjusting your search criteria.</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-app/50 border-b border-subtle">
+                  <th className="px-5 py-3 text-xs font-semibold text-muted uppercase tracking-wider">Member</th>
+                  <th className="px-5 py-3 text-xs font-semibold text-muted uppercase tracking-wider">Role</th>
+                  <th className="px-5 py-3 text-xs font-semibold text-muted uppercase tracking-wider">Status</th>
+                  <th className="px-5 py-3 text-xs font-semibold text-muted uppercase tracking-wider text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-subtle">
+                {filtered.map((m) => {
+                  const isProcessing = processingId === m.id;
+                  
+                  return (
+                    <tr 
+                      key={m.id} 
+                      className={`hover:bg-app/30 transition-colors ${isProcessing ? 'opacity-50 pointer-events-none' : ''}`}
+                    >
+                      {/* Name & Avatar Column */}
+                      <td className="px-5 py-3 whitespace-nowrap">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-full bg-brand-500/10 text-brand-600 dark:text-brand-400 border border-brand-500/20 flex items-center justify-center font-bold text-sm shrink-0">
+                            {getInitials(m.profile?.full_name)}
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-sm font-semibold text-main">
+                              {m.profile?.full_name || 'Unnamed Member'}
+                            </span>
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Role Column */}
+                      <td className="px-5 py-3 whitespace-nowrap">
+                        {isSuperAdmin(role) ? (
+                          <div className="relative inline-block w-40">
+                            <select
+                              value={m.role}
+                              onChange={(e) => handleRoleChange(m.id, e.target.value)}
+                              disabled={isProcessing}
+                              className="w-full pl-3 pr-8 py-1.5 text-xs font-semibold bg-surface border border-subtle rounded-md text-main focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 cursor-pointer appearance-none transition-all"
+                            >
+                              <option value="member">Member</option>
+                              <option value="sub_admin">Sub Admin</option>
+                              <option value="super_admin">Super Admin</option>
+                            </select>
+                            <Shield className="w-3.5 h-3.5 text-muted absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                          </div>
+                        ) : (
+                          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-app border border-subtle text-xs font-medium text-main">
+                            <Shield className="w-3.5 h-3.5 text-muted" />
+                            {formatEnumLabel(m.role)}
+                          </div>
+                        )}
+                      </td>
+
+                      {/* Status Column */}
+                      <td className="px-5 py-3 whitespace-nowrap">
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${
+                          m.status === 'active' 
+                            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
+                            : 'bg-slate-500/10 text-slate-600 dark:text-slate-400 border border-slate-500/20'
+                        }`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${m.status === 'active' ? 'bg-emerald-500' : 'bg-slate-500'}`} />
+                          {formatEnumLabel(m.status)}
+                        </span>
+                      </td>
+
+                      {/* Actions Column */}
+                      <td className="px-5 py-3 whitespace-nowrap text-right">
+                        {m.status === 'active' ? (
+                          <button
+                            onClick={() => handleSuspend(m.id)}
+                            disabled={isProcessing}
+                            title="Suspend Member"
+                            className="inline-flex items-center justify-center p-2 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-500/10 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500/30 disabled:opacity-50"
+                            aria-label="Suspend member"
+                          >
+                            <UserX className="w-4 h-4" />
+                          </button>
+                        ) : (
+                          <span className="text-xs text-muted italic px-2">Suspended</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

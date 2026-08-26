@@ -1,53 +1,81 @@
 import { supabase } from '../lib/supabase';
 
 export interface AttendanceTrendPoint {
-  eventTitle: string;
-  eventDate: string;
+  label: string;
+  date: string;
   attendeeCount: number;
 }
 
-export async function getAttendanceTrend(orgId: string, limit = 12): Promise<AttendanceTrendPoint[]> {
-  const [eventResults, scheduleResults] = await Promise.all([
-    supabase
-      .from('events')
-      .select('title, start_time, attendance_sessions(attendance_logs(id))')
-      .eq('org_id', orgId)
-      .order('start_time', { ascending: false })
-      .limit(limit),
-    supabase
-      .from('attendance_sessions')
-      .select('session_date, church_schedules!inner(title, org_id), attendance_logs(id)')
-      .eq('church_schedules.org_id', orgId)
-      .not('schedule_id', 'is', null)
-      .order('session_date', { ascending: false })
-      .limit(limit),
-  ]);
+interface RecurringSessionRecord {
+  session_date: string;
+  attendance_logs: { id: string }[] | null;
+}
 
-  if (eventResults.error) throw eventResults.error;
-  if (scheduleResults.error) throw scheduleResults.error;
+interface EventSessionRecord {
+  title: string;
+  start_time: string;
+  attendance_sessions: {
+    attendance_logs: { id: string }[] | null;
+  }[] | null;
+}
 
-  const fromEvents: AttendanceTrendPoint[] = (eventResults.data ?? []).map((event: any) => ({
-    eventTitle: event.title,
-    eventDate: event.start_time,
-    attendeeCount: (event.attendance_sessions ?? []).reduce(
-      (sum: number, session: any) => sum + (session.attendance_logs?.length ?? 0),
-      0
-    ),
-  }));
+interface UserLogRecord {
+  user_id: string;
+}
 
-  const fromSchedules: AttendanceTrendPoint[] = (scheduleResults.data ?? []).map((s: any) => ({
-    eventTitle: s.church_schedules.title,
-    eventDate: s.session_date,
-    attendeeCount: s.attendance_logs?.length ?? 0,
-  }));
+interface GroupRecord {
+  id: string;
+  name: string;
+}
 
-  // Merge both sources, sort by date, keep only the most recent `limit` overall
-  const combined = [...fromEvents, ...fromSchedules]
-    .sort((a, b) => new Date(b.eventDate).getTime() - new Date(a.eventDate).getTime())
-    .slice(0, limit)
-    .reverse(); // oldest → newest for the chart
+// One program at a time — trends a SINGLE recurring schedule item across
+// its recent dated occurrences, so the line chart is meaningful (comparing
+// the same program week over week, not mixing different programs together)
+export async function getRecurringTrend(scheduleId: string, limit = 12): Promise<AttendanceTrendPoint[]> {
+  const { data, error } = await supabase
+    .from('attendance_sessions')
+    .select('session_date, attendance_logs(id)')
+    .eq('schedule_id', scheduleId)
+    .order('session_date', { ascending: false })
+    .limit(limit);
 
-  return combined;
+  if (error) throw error;
+
+  const typedData = (data ?? []) as unknown as RecurringSessionRecord[];
+
+  return typedData
+    .map((s) => ({
+      label: s.session_date,
+      date: s.session_date,
+      attendeeCount: s.attendance_logs?.length ?? 0,
+    }))
+    .reverse();
+}
+
+// All custom (one-off) events, compared side by side — no single trend
+// line implied, since each event is unrelated to the others
+export async function getCustomEventComparison(orgId: string, limit = 12): Promise<AttendanceTrendPoint[]> {
+  const { data, error } = await supabase
+    .from('events')
+    .select('title, start_time, attendance_sessions(attendance_logs(id))')
+    .eq('org_id', orgId)
+    .order('start_time', { ascending: false })
+    .limit(limit);
+
+  if (error) throw error;
+
+  const typedData = (data ?? []) as unknown as EventSessionRecord[];
+
+  return typedData
+    .map((e) => ({
+      label: e.title,
+      date: e.start_time,
+      attendeeCount: (e.attendance_sessions ?? []).reduce(
+        (sum, session) => sum + (session.attendance_logs?.length ?? 0),
+        0
+      ),
+    }))
+    .reverse();
 }
 
 export interface RetentionSummary {
@@ -83,9 +111,12 @@ export async function getRetentionSummary(orgId: string): Promise<RetentionSumma
   if (eventLogs.error) throw eventLogs.error;
   if (scheduleLogs.error) throw scheduleLogs.error;
 
+  const typedEventLogs = (eventLogs.data ?? []) as unknown as UserLogRecord[];
+  const typedScheduleLogs = (scheduleLogs.data ?? []) as unknown as UserLogRecord[];
+
   const uniqueActiveUsers = new Set([
-    ...(eventLogs.data ?? []).map((log: any) => log.user_id),
-    ...(scheduleLogs.data ?? []).map((log: any) => log.user_id),
+    ...typedEventLogs.map((log) => log.user_id),
+    ...typedScheduleLogs.map((log) => log.user_id),
   ]);
   const activeLast30Days = uniqueActiveUsers.size;
 
@@ -109,9 +140,10 @@ export async function getAttendanceByGroup(orgId: string): Promise<GroupBreakdow
 
   if (groupsError) throw groupsError;
 
+  const typedGroups = (groups ?? []) as unknown as GroupRecord[];
   const results: GroupBreakdown[] = [];
 
-  for (const group of groups ?? []) {
+  for (const group of typedGroups) {
     const [eventLogs, scheduleLogs] = await Promise.all([
       supabase
         .from('attendance_logs')
