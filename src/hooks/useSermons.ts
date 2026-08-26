@@ -23,9 +23,14 @@ export function useSermons() {
   }, [activeOrg]);
 
   useEffect(() => {
-    load();
-  }, [load]);
+    // Defer execution so setState runs asynchronously outside the synchronous effect pass
+    const timer = setTimeout(() => {
+      load();
+    }, 0);
 
+    return () => clearTimeout(timer);
+  }, [load]);
+  
   const createSermon = async (params: { title: string; mediaUrl: string; speaker?: string; datePreached?: string; tags?: string[] }) => {
     if (!activeOrg) throw new Error('No active organization');
     await sermonService.createSermon({ orgId: activeOrg.id, ...params });

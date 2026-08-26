@@ -15,8 +15,9 @@ export function useCheckIn() {
     setError(null);
     try {
       await attendanceService.checkInWithCode(passcode, user.id);
-    } catch (err: any) {
-      setError(err.message ?? 'Check-in failed.');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Check-in failed.';
+      setError(message);
       throw err;
     } finally {
       setSubmitting(false);
@@ -29,8 +30,9 @@ export function useCheckIn() {
     setError(null);
     try {
       await attendanceService.checkInWithQr(qrToken, user.id);
-    } catch (err: any) {
-      setError(err.message ?? 'Check-in failed.');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Check-in failed.';
+      setError(message);
       throw err;
     } finally {
       setSubmitting(false);

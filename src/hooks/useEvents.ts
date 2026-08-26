@@ -34,9 +34,13 @@ export function useEvents() {
   }, [activeOrg]);
 
   useEffect(() => {
-    load();
-  }, [load]);
+    // Defer execution so setState runs asynchronously outside the synchronous effect pass
+    const timer = setTimeout(() => {
+      load();
+    }, 0);
 
+    return () => clearTimeout(timer);
+  }, [load]); 
   const createEvent = async (params: {
     title: string;
     startTime: string;

@@ -25,7 +25,12 @@ export function useAnnouncements() {
   }, [activeOrg]);
 
   useEffect(() => {
-    load();
+    // Defer execution so setState runs asynchronously outside the synchronous effect pass
+    const timer = setTimeout(() => {
+      load();
+    }, 0);
+
+    return () => clearTimeout(timer);
   }, [load]);
 
   const createAnnouncement = async (title: string, content: string, groupId?: string) => {

@@ -1,10 +1,17 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useMemberships } from './useMemberShip';
 import * as groupService from '../services/groupServices';
+import type { Database } from '../types/database.types';
+
+type GroupMemberRow = Database['public']['Tables']['group_members']['Row'];
+
+export interface GroupMemberRecord extends GroupMemberRow {
+  profile?: Database['public']['Tables']['profiles']['Row'] | null;
+}
 
 export function useGroupMembers(groupId: string | null) {
   const { members: allMembers } = useMemberships(); // full church roster, for the "add" picker
-  const [groupMembers, setGroupMembers] = useState<unknown[]>([]);
+  const [groupMembers, setGroupMembers] = useState<GroupMemberRecord[]>([]);
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
@@ -14,13 +21,23 @@ export function useGroupMembers(groupId: string | null) {
       return;
     }
     setLoading(true);
-    const data = await groupService.getGroupMembers(groupId);
-    setGroupMembers(data);
-    setLoading(false);
+    try {
+      const data = await groupService.getGroupMembers(groupId);
+      setGroupMembers(data as unknown as GroupMemberRecord[]);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   }, [groupId]);
 
   useEffect(() => {
-    load();
+    // Defer execution so setState runs asynchronously outside the synchronous effect pass
+    const timer = setTimeout(() => {
+      load();
+    }, 0);
+
+    return () => clearTimeout(timer);
   }, [load]);
 
   const addMember = async (userId: string) => {

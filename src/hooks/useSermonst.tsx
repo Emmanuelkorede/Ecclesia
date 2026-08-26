@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useActiveOrg } from './useActiveOrg';
-import * as sermonService from '../services/sermonServies';
+import * as sermonService from '../services/sermonServices';
 import type { Database } from '../types/database.types';
 
 type Sermon = Database['public']['Tables']['sermons']['Row'];
@@ -23,7 +23,12 @@ export function useSermons() {
   }, [activeOrg]);
 
   useEffect(() => {
-    load();
+    // Defer execution so setState runs asynchronously outside the synchronous effect pass
+    const timer = setTimeout(() => {
+      load();
+    }, 0);
+
+    return () => clearTimeout(timer);
   }, [load]);
 
   const createSermon = async (params: { title: string; mediaUrl: string; speaker?: string; datePreached?: string; tags?: string[] }) => {

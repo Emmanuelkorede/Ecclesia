@@ -27,7 +27,12 @@ export function useGroups() {
   }, [activeOrg]);
 
   useEffect(() => {
-    load();
+    // Defer execution so setState runs asynchronously outside the synchronous effect pass
+    const timer = setTimeout(() => {
+      load();
+    }, 0);
+
+    return () => clearTimeout(timer);
   }, [load]);
 
   const createGroup = async (name: string, description?: string, leaderId?: string) => {
