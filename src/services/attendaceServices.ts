@@ -1,6 +1,6 @@
 import { supabase } from '../lib/supabase';
 import type { Database } from '../types/database.types';
-import { generatePasscode, generateQrToken } from '../utils/attendacneHelpers';
+import { generatePasscode, generateQrToken } from '../utils/attendanceHelpers';
 
 type AttendanceSession = Database['public']['Tables']['attendance_sessions']['Row'];
 type AttendanceLog = Database['public']['Tables']['attendance_logs']['Row'];
