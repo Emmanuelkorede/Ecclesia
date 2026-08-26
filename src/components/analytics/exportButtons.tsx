@@ -2,9 +2,8 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { formatShortDate } from '../../utils/dateHelpers';
 import type { AttendanceTrendPoint } from '../../services/analytics';
-import { canUsePdfExport, canUseCsvExport } from '../../utils/planLimits'; 
+import { canUsePdfExport, canUseCsvExport, getEffectivePlanForLimits } from '../../utils/planLimits';
 import { useSubscription } from '../../hooks/useSubscirptionservcies';
-import { getEffectivePlanForLimits } from '../../utils/planLimits';
 
 interface Props {
   data: AttendanceTrendPoint[];
@@ -16,8 +15,8 @@ export default function ExportButtons({ data, orgName }: Props) {
   const effectivePlan = getEffectivePlanForLimits(currentPlan, isExpired);
 
   const exportCsv = () => {
-    const header = 'Event,Date,Attendees\n';
-    const rows = data.map((d) => `"${d.eventTitle}",${formatShortDate(d.eventDate)},${d.attendeeCount}`).join('\n');
+    const header = 'Label,Date,Attendees\n';
+    const rows = data.map((d) => `"${d.label}",${formatShortDate(d.date)},${d.attendeeCount}`).join('\n');
     const blob = new Blob([header + rows], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -32,8 +31,8 @@ export default function ExportButtons({ data, orgName }: Props) {
     doc.text(`${orgName} — Attendance Report`, 14, 16);
     autoTable(doc, {
       startY: 24,
-      head: [['Event', 'Date', 'Attendees']],
-      body: data.map((d) => [d.eventTitle, formatShortDate(d.eventDate), d.attendeeCount.toString()]),
+      head: [['Label', 'Date', 'Attendees']],
+      body: data.map((d) => [d.label, formatShortDate(d.date), d.attendeeCount.toString()]),
     });
     doc.save(`${orgName}-attendance.pdf`);
   };

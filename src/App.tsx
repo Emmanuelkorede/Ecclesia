@@ -24,17 +24,18 @@ import SermonsPage from './pages/admin/sermonsPage';
 import AnnouncementsPage from './pages/admin/annoucmentPage';
 import MemberDashboardPage from './pages/member/memberDashboard';
 import CheckInPage from './pages/member/checkinPage';
-import ScheduleSermonsPage from './pages/member/serMonsPage';
 import SchedulePage from './pages/admin/schedulePage';
 import AnnouncementDetailPage from './pages/member/announcementDetailsPage';
 import MyAttendancePage from './pages/member/myAttendance';
 import ProfilePage from './pages/member/profilePage';
 import MemberAnnouncementsPage from './pages/member/annoucementsPage';
+import MemberSermonsPage from './pages/member/serMonsPage';
 
 import PaymentApprovalsPage from './pages/platFormOwner/paymentApprovalPage';
 import SaaSOverviewPage from './pages/platFormOwner/saasOverviewPage';
 import PlatformOwnerRoute from './routes/platformOwnnerRoute';
 import PlatformOwnerDeniedPage from './pages/platFormOwner/platformwonerdenied';
+import MemberSchedulePage from './pages/member/schedeulePage';
 
 function App() {
 
@@ -82,7 +83,8 @@ function App() {
           //member 
           <Route path='/member/dashboard' element={<MemberDashboardPage />} />
           <Route path='/member/check-in' element={<CheckInPage />} />
-          <Route path='/member/sermons' element={<ScheduleSermonsPage />} />
+          <Route path='/member/schedule' element={<MemberSchedulePage />} />
+          <Route path='/member/sermons' element={<MemberSermonsPage />} />
           <Route path='/member/announcements/:id' element={<AnnouncementDetailPage />} />
           <Route path='/member/announcements' element={<MemberAnnouncementsPage />} />
           <Route path='/member/attendance' element={<MyAttendancePage />} />
