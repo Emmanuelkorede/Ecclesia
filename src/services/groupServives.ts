@@ -10,12 +10,15 @@ interface CreateGroupPayload {
   leaderId?: string;
 }
 
+interface RawGroupRecord extends Group {
+  leader: { full_name: string | null } | null;
+  group_members: { count: number }[] | null;
+}
+
 export interface GroupWithDetails extends Group {
   leader_name: string | null;
   member_count: number;
 }
-
-
 
 export async function getGroupsForOrg(orgId: string): Promise<GroupWithDetails[]> {
   const { data, error } = await supabase
@@ -26,13 +29,14 @@ export async function getGroupsForOrg(orgId: string): Promise<GroupWithDetails[]
 
   if (error) throw error;
 
-  return (data ?? []).map((g: any) => ({
+  const typedData = (data ?? []) as unknown as RawGroupRecord[];
+
+  return typedData.map((g) => ({
     ...g,
     leader_name: g.leader?.full_name ?? null,
     member_count: g.group_members?.[0]?.count ?? 0,
   }));
 }
-
 
 export async function createGroup(payload: CreateGroupPayload): Promise<Group> {
   const { data, error } = await supabase

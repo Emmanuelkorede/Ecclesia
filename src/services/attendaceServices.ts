@@ -20,6 +20,33 @@ interface CreateScheduleSessionPayload {
   expiresInMinutes?: number;
 }
 
+interface RawEventSession extends AttendanceSession {
+  events: {
+    title: string;
+    org_id: string;
+    group_id: string | null;
+  } | null;
+}
+
+interface RawScheduleSession extends AttendanceSession {
+  church_schedules: {
+    title: string;
+    org_id: string;
+    group_id: string | null;
+  } | null;
+}
+
+export interface NormalizedActiveSession extends AttendanceSession {
+  events?: {
+    title: string;
+    group_id: string | null;
+  };
+}
+
+interface SupabaseErrorLike {
+  message?: string;
+  code?: string;
+}
 
 export async function createAttendanceSession(payload: CreateSessionPayload): Promise<AttendanceSession> {
   const expiresAt = new Date(Date.now() + (payload.expiresInMinutes ?? 15) * 60_000).toISOString();
@@ -66,15 +93,14 @@ export async function closeSession(sessionId: string): Promise<void> {
 // non-expired session before inserting. Group-restriction is enforced by
 // RLS on attendance_logs (checked server-side regardless of this check).
 
-function toFriendlyCheckInError(error: any): Error {
-  const message = error?.message ?? '';
-  if (error?.code === '42501' || message.includes('row-level security')) {
+function toFriendlyCheckInError(error: unknown): Error {
+  const err = error as SupabaseErrorLike;
+  const message = err?.message ?? '';
+  if (err?.code === '42501' || message.includes('row-level security')) {
     return new Error("You're not eligible to check in to this event. It may be restricted to a specific group.");
   }
   return error instanceof Error ? error : new Error(message || 'Check-in failed.');
 }
-
-
 
 export async function checkInWithCode(passcode: string, userId: string): Promise<AttendanceLog> {
   const { data: session, error: sessionError } = await supabase
@@ -97,7 +123,6 @@ export async function checkInWithCode(passcode: string, userId: string): Promise
   if (error) throw toFriendlyCheckInError(error);
   return data;
 }
-
 
 // Member self check-in via QR scan
 export async function checkInWithQr(qrToken: string, userId: string): Promise<AttendanceLog> {
@@ -143,6 +168,7 @@ export async function getLogsForSession(sessionId: string) {
   if (error) throw error;
   return data ?? [];
 }
+
 // Member's own attendance history — used by MyAttendancePage later
 export async function getMyAttendanceLogs(userId: string) {
   const { data, error } = await supabase
@@ -162,7 +188,7 @@ export async function getMyAttendanceLogs(userId: string) {
   return data ?? [];
 }
 
-export async function getActiveSessionsForOrg(orgId: string) {
+export async function getActiveSessionsForOrg(orgId: string): Promise<NormalizedActiveSession[]> {
   const [eventSessions, scheduleSessions] = await Promise.all([
     supabase
       .from('attendance_sessions')
@@ -181,18 +207,24 @@ export async function getActiveSessionsForOrg(orgId: string) {
   if (eventSessions.error) throw eventSessions.error;
   if (scheduleSessions.error) throw scheduleSessions.error;
 
-  // Normalize both shapes so downstream code (which reads .events?.title
-  // and .events?.group_id) works regardless of which path a session came from
-  const normalizedEvents = (eventSessions.data ?? []).map((s: any) => ({ ...s, events: s.events }));
-  const normalizedSchedules = (scheduleSessions.data ?? []).map((s: any) => ({
+  const typedEvents = (eventSessions.data ?? []) as unknown as RawEventSession[];
+  const typedSchedules = (scheduleSessions.data ?? []) as unknown as RawScheduleSession[];
+
+  // Normalize both shapes so downstream code works regardless of source
+  const normalizedEvents: NormalizedActiveSession[] = typedEvents.map((s) => ({
     ...s,
-    events: { title: s.church_schedules.title, group_id: s.church_schedules.group_id },
+    events: s.events ? { title: s.events.title, group_id: s.events.group_id } : undefined,
+  }));
+
+  const normalizedSchedules: NormalizedActiveSession[] = typedSchedules.map((s) => ({
+    ...s,
+    events: s.church_schedules
+      ? { title: s.church_schedules.title, group_id: s.church_schedules.group_id }
+      : undefined,
   }));
 
   return [...normalizedEvents, ...normalizedSchedules];
 }
-
-
 
 export async function hasUserCheckedIn(sessionId: string, userId: string): Promise<boolean> {
   const { data, error } = await supabase
@@ -206,7 +238,7 @@ export async function hasUserCheckedIn(sessionId: string, userId: string): Promi
   return !!data;
 }
 
-export async function getEligibleActiveSessionsForUser(orgId: string, userId: string) {
+export async function getEligibleActiveSessionsForUser(orgId: string, userId: string): Promise<NormalizedActiveSession[]> {
   const sessions = await getActiveSessionsForOrg(orgId);
 
   const { data: userGroups, error } = await supabase
@@ -217,12 +249,11 @@ export async function getEligibleActiveSessionsForUser(orgId: string, userId: st
   if (error) throw error;
   const userGroupIds = new Set((userGroups ?? []).map((g) => g.group_id));
 
-  return sessions.filter((s: any) => {
+  return sessions.filter((s) => {
     const groupId = s.events?.group_id;
     return !groupId || userGroupIds.has(groupId);
   });
 }
-
 
 export async function getAnySessionForEvent(eventId: string) {
   const { data, error } = await supabase
@@ -248,7 +279,6 @@ export async function getAnySessionForSchedule(scheduleId: string, sessionDate: 
   if (error) throw error;
   return data;
 }
-
 
 export async function createScheduleAttendanceSession(payload: CreateScheduleSessionPayload): Promise<AttendanceSession> {
   const expiresAt = new Date(Date.now() + (payload.expiresInMinutes ?? 15) * 60_000).toISOString();

@@ -1,18 +1,18 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { formatShortDate } from '../../utils/dateHelpers';
-import {type  AttendanceTrendPoint } from '../../services/analytics';
+import type { AttendanceTrendPoint } from '../../services/analytics';
 
 interface Props {
   data: AttendanceTrendPoint[];
 }
 
 export default function AttendanceLineChart({ data }: Props) {
-  if (data.length === 0) {
+  if (!data || data.length === 0) {
     return <p className="text-sm text-[var(--text-muted)] py-8 text-center">No attendance data yet.</p>;
   }
 
   const chartData = data.map((d) => ({
-    name: formatShortDate(d.eventDate),
+    name: formatShortDate(d.date),
     attendees: d.attendeeCount,
   }));
 
