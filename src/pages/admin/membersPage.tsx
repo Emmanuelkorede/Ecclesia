@@ -1,17 +1,15 @@
 import { useState } from 'react';
 import { useMemberships } from '../../hooks/useMemberShip';
 import { useActiveOrg } from '../../hooks/useActiveOrg';
-import MemberTagPicker from '../../components/groups/MemberTagPicker';
 import PlanLimitBanner from '../../components/billing/planLimitBanner';
-import { isSuperAdmin } from '../../utils/permissions'
+import { isSuperAdmin } from '../../utils/permissions';
 import { formatEnumLabel } from '../../utils/formatters';
-import { Check, X, ChevronDown } from 'lucide-react';
+import { Check, X } from 'lucide-react';
 
 export default function MembersPage() {
-  const { members, loading, updateRole, updateStatus, updateTags } = useMemberships();
+  const { members, loading, updateRole, updateStatus } = useMemberships();
   const { role } = useActiveOrg();
   const [search, setSearch] = useState('');
-  const [editingTagsFor, setEditingTagsFor] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
   const filtered = members.filter((m: any) =>
@@ -59,7 +57,6 @@ export default function MembersPage() {
                 <th className="text-left px-4 py-3 font-medium">Name</th>
                 <th className="text-left px-4 py-3 font-medium">Role</th>
                 <th className="text-left px-4 py-3 font-medium">Status</th>
-                <th className="text-left px-4 py-3 font-medium">Tags</th>
                 <th className="text-right px-4 py-3 font-medium">Actions</th>
               </tr>
             </thead>
@@ -94,25 +91,6 @@ export default function MembersPage() {
                     >
                       {formatEnumLabel(m.status)}
                     </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    {editingTagsFor === m.id ? (
-                      <div className="min-w-[200px]">
-                        <MemberTagPicker
-                          tags={m.tags ?? []}
-                          onChange={(tags) => updateTags(m.id, tags)}
-                          suggestions={['Choir', 'Usher', 'Media Team', 'Sunday School']}
-                        />
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => setEditingTagsFor(m.id)}
-                        className="flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-brand-600"
-                      >
-                        {(m.tags ?? []).length > 0 ? m.tags.join(', ') : 'Add tags'}
-                        <ChevronDown className="w-3 h-3" />
-                      </button>
-                    )}
                   </td>
                   <td className="px-4 py-3 text-right">
                     {m.status === 'pending' && (

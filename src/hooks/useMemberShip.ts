@@ -34,7 +34,6 @@ export function useMemberships() {
     await load();
   };
 
-  // Approving a pending member counts as "adding" them for limit purposes
   const updateStatus = async (membershipId: string, status: Membership['status']) => {
     if (status === 'active' && activeOrg) {
       const effectivePlan = getEffectivePlanForLimits(currentPlan, isExpired);
@@ -49,15 +48,10 @@ export function useMemberships() {
     await load();
   };
 
-  const updateTags = async (membershipId: string, tags: string[]) => {
-    await membershipService.updateMembershipTags(membershipId, tags);
-    await load();
-  };
-
   const remove = async (membershipId: string) => {
     await membershipService.removeMembership(membershipId);
     await load();
   };
 
-  return { members, loading, updateRole, updateStatus, updateTags, remove, refresh: load };
+  return { members, loading, updateRole, updateStatus, remove, refresh: load };
 }

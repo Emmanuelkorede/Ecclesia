@@ -13,8 +13,6 @@ export async function getMembershipsForOrg(orgId: string): Promise<Membership[]>
   return data ?? [];
 }
 
-// Needed for limit checks — counts only active members, since pending/suspended
-// shouldn't count against the plan's member cap
 export async function getActiveMemberCount(orgId: string): Promise<number> {
   const { count, error } = await supabase
     .from('memberships')
@@ -32,8 +30,6 @@ interface CreateMembershipPayload {
   role?: Membership['role'];
 }
 
-// Used by MemberJoinPage — pulled out of the page into the service layer
-// so limit-checking can happen consistently in one place
 export async function createMembership(payload: CreateMembershipPayload): Promise<Membership> {
   const { data, error } = await supabase
     .from('memberships')
@@ -57,11 +53,6 @@ export async function updateMembershipRole(membershipId: string, role: Membershi
 
 export async function updateMembershipStatus(membershipId: string, status: Membership['status']): Promise<void> {
   const { error } = await supabase.from('memberships').update({ status }).eq('id', membershipId);
-  if (error) throw error;
-}
-
-export async function updateMembershipTags(membershipId: string, tags: string[]): Promise<void> {
-  const { error } = await supabase.from('memberships').update({ tags }).eq('id', membershipId);
   if (error) throw error;
 }
 
