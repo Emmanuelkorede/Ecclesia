@@ -60,44 +60,40 @@ export default function SettingsPage() {
   if (!activeOrg) return null;
 
   return (
-    <div className="max-w-4xl mx-auto w-full space-y-5 pb-8 animate-in fade-in duration-300">
-      
+    <div className="max-w-5xl mx-auto w-full space-y-6 animate-in fade-in duration-300 pb-8">
       {/* Page Header */}
-      <div className="mb-6">
+      <div>
         <h1 className="text-2xl font-bold text-main tracking-tight">Organization Settings</h1>
         <p className="text-muted mt-1 text-sm">
           Manage {activeOrg.name}'s details, member access, and workspace appearance.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-5 lg:gap-6">
-        
-        {/* Left Column: Forms & Primary Settings */}
-        <div className="md:col-span-7 space-y-5">
-          
-          {/* General Information Card */}
-          <div className="bg-surface border border-subtle rounded-xl overflow-hidden shadow-sm">
-            <div className="px-5 py-3.5 border-b border-subtle bg-app/30 flex items-center gap-2.5">
-              <div className="p-1.5 rounded-lg bg-brand-500/10 text-brand-600 dark:text-brand-400">
-                <Building className="w-4 h-4" />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+        {/* Left Column: General Settings Form */}
+        <div className="space-y-6">
+          <div className="bg-surface border border-subtle rounded-xl shadow-sm p-5 space-y-4">
+            <div className="flex items-center gap-3 border-b border-subtle pb-4">
+              <div className="w-9 h-9 rounded-lg bg-brand-500/10 text-brand-600 flex items-center justify-center shrink-0 border border-brand-500/20">
+                <Building className="w-5 h-5" />
               </div>
               <div>
-                <h2 className="text-sm font-semibold text-main">Church Details</h2>
-                <p className="text-xs text-muted">Update your organization's core information</p>
+                <h2 className="text-base font-semibold text-main leading-tight">Church Details</h2>
+                <p className="text-xs text-muted mt-0.5">Update your organization's core information</p>
               </div>
             </div>
-            
-            <div className="p-5">
+
+            <div className="space-y-4">
               {error && (
-                <div className="flex items-start gap-2 p-3 mb-4 text-xs rounded-lg bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400">
-                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-red-500" />
-                  <span className="leading-snug">{error}</span>
+                <div className="flex items-center gap-2 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-600 dark:text-red-400 text-xs font-medium animate-in fade-in duration-200">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{error}</span>
                 </div>
               )}
 
               <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-xs font-medium text-main mb-1">
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-semibold text-main">
                     Church Name
                   </label>
                   <input
@@ -106,12 +102,13 @@ export default function SettingsPage() {
                     disabled={!canEdit}
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full px-3 py-2 bg-app border border-subtle rounded-lg text-sm text-main focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                     placeholder="Enter church name"
+                    className="w-full px-3 py-2 bg-app border border-subtle rounded-lg text-sm text-main focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 transition-all placeholder:text-muted disabled:opacity-50 disabled:cursor-not-allowed"
                   />
                 </div>
-                <div>
-                  <label className="block text-xs font-medium text-main mb-1">
+
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-semibold text-main">
                     Address <span className="text-muted font-normal">(Optional)</span>
                   </label>
                   <input
@@ -119,17 +116,17 @@ export default function SettingsPage() {
                     disabled={!canEdit}
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
-                    className="w-full px-3 py-2 bg-app border border-subtle rounded-lg text-sm text-main focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                     placeholder="e.g., 123 Faith Avenue"
+                    className="w-full px-3 py-2 bg-app border border-subtle rounded-lg text-sm text-main focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 transition-all placeholder:text-muted disabled:opacity-50 disabled:cursor-not-allowed"
                   />
                 </div>
-                
+
                 {canEdit && (
-                  <div className="pt-1.5 flex justify-end">
+                  <div className="pt-2">
                     <button
                       type="submit"
-                      disabled={saving || (!name.trim())}
-                      className="flex items-center gap-1.5 px-4 py-2 bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white text-sm font-semibold rounded-lg shadow-sm transition-all disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
+                      disabled={saving || !name.trim()}
+                      className="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-medium text-xs rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer shadow-sm"
                     >
                       {saving ? (
                         <>
@@ -150,83 +147,87 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* Right Column: Code & Appearance */}
-        <div className="md:col-span-5 space-y-5">
-          
-          {/* Member Invitation Code Card */}
-          <div className="bg-surface border border-subtle rounded-xl overflow-hidden shadow-sm">
-            <div className="px-5 py-3.5 border-b border-subtle bg-app/30 flex items-center gap-2.5">
-              <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-                <KeyRound className="w-4 h-4" />
+        {/* Right Column: Code, Logo & Appearance */}
+        <div className="space-y-6">
+          {/* Member Access Card */}
+          <div className="bg-surface border border-subtle rounded-xl shadow-sm p-5 space-y-4">
+            <div className="flex items-center gap-3 border-b border-subtle pb-4">
+              <div className="w-9 h-9 rounded-lg bg-brand-500/10 text-brand-600 flex items-center justify-center shrink-0 border border-brand-500/20">
+                <KeyRound className="w-5 h-5" />
               </div>
               <div>
-                <h2 className="text-sm font-semibold text-main">Member Access</h2>
-                <p className="text-xs text-muted">Invite members to your workspace</p>
+                <h2 className="text-base font-semibold text-main leading-tight">Member Access</h2>
+                <p className="text-xs text-muted mt-0.5">Invite members to your workspace</p>
               </div>
             </div>
-            
-            <div className="p-5 space-y-3.5">
-              <p className="text-xs text-main leading-relaxed">
+
+            <div className="space-y-3">
+              <p className="text-xs text-muted leading-relaxed">
                 Share this unique code with your congregation so they can join your workspace during sign-up.
               </p>
-              
-              <div className="flex items-center justify-between p-2.5 rounded-lg bg-app border border-subtle">
-                <span className="font-mono text-base font-bold tracking-wider text-brand-600 dark:text-brand-400 ml-1.5">
+
+              <div className="flex items-center justify-between gap-3 p-2.5 bg-app border border-subtle rounded-lg">
+                <span className="font-mono text-sm font-bold text-main tracking-wider pl-1">
                   {activeOrg.church_code}
                 </span>
                 <button
                   type="button"
                   onClick={handleCopyCode}
-                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors cursor-pointer ${
-                    copied 
-                      ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' 
-                      : 'bg-surface hover:bg-slate-100 dark:hover:bg-slate-800 border border-subtle text-main'
-                  }`}
+                  className="px-3 py-1.5 bg-surface hover:bg-subtle border border-subtle text-main rounded-md text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
                 >
-                  {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                  {copied ? 'Copied!' : 'Copy'}
+                  {copied ? (
+                    <>
+                      <Check className="w-3.5 h-3.5 text-emerald-500" />
+                      <span className="text-emerald-500">Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5 text-muted" />
+                      <span>Copy</span>
+                    </>
+                  )}
                 </button>
               </div>
             </div>
           </div>
 
+          {/* Logo Uploader */}
           <LogoUploader
-  orgId={activeOrg.id}
-  currentLogoUrl={activeOrg.logo_url}
-  canEdit={canEdit}
-  onUploaded={() => refreshMemberships()}
-/>
+            orgId={activeOrg.id}
+            currentLogoUrl={activeOrg.logo_url}
+            canEdit={canEdit}
+            onUploaded={() => refreshMemberships()}
+          />
 
           {/* Appearance Card */}
-          <div className="bg-surface border border-subtle rounded-xl overflow-hidden shadow-sm">
-            <div className="px-5 py-3.5 border-b border-subtle bg-app/30 flex items-center gap-2.5">
-              <div className="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
-                <Palette className="w-4 h-4" />
+          <div className="bg-surface border border-subtle rounded-xl shadow-sm p-5 space-y-4">
+            <div className="flex items-center gap-3 border-b border-subtle pb-4">
+              <div className="w-9 h-9 rounded-lg bg-brand-500/10 text-brand-600 flex items-center justify-center shrink-0 border border-brand-500/20">
+                <Palette className="w-5 h-5" />
               </div>
               <div>
-                <h2 className="text-sm font-semibold text-main">Appearance</h2>
-                <p className="text-xs text-muted">Customize your experience</p>
+                <h2 className="text-base font-semibold text-main leading-tight">Appearance</h2>
+                <p className="text-xs text-muted mt-0.5">Customize your experience</p>
               </div>
             </div>
-            
-            <div className="p-5 space-y-5">
-              
-              {/* Theme Toggle Component */}
-              <div className="flex flex-col gap-2">
-                <label className="text-[10px] font-semibold text-muted uppercase tracking-wider">
+
+            <div className="space-y-5">
+              {/* Theme Toggle */}
+              <div className="flex items-center justify-between gap-4">
+                <label className="text-xs font-semibold text-main">
                   Interface Theme
                 </label>
                 <ThemeToggle />
               </div>
 
-              <div className="h-px w-full bg-subtle" />
+              <div className="h-px bg-subtle" />
 
-              {/* Accent Picker Component */}
-              <AccentPicker />
-
+              {/* Accent Picker */}
+              <div className="space-y-2">
+                <AccentPicker />
+              </div>
             </div>
           </div>
-
         </div>
       </div>
     </div>

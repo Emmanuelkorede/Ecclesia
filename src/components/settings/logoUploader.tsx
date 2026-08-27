@@ -33,8 +33,9 @@ export default function LogoUploader({ orgId, currentLogoUrl, canEdit, onUploade
     try {
       const url = await uploadChurchLogo(orgId, file);
       onUploaded(url);
-    } catch (err: any) {
-      setError(err.message ?? 'Upload failed. Please try again.');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Upload failed. Please try again.';
+      setError(message);
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -42,61 +43,69 @@ export default function LogoUploader({ orgId, currentLogoUrl, canEdit, onUploade
   };
 
   return (
-    <div className="bg-surface border border-subtle rounded-xl overflow-hidden shadow-sm">
-      <div className="px-5 py-3.5 border-b border-subtle bg-app/30 flex items-center gap-2.5">
-        <div className="p-1.5 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
-          <ImageIcon className="w-4 h-4" />
+    <div className="bg-surface border border-subtle rounded-xl shadow-sm p-5 space-y-4">
+      {/* Header */}
+      <div className="flex items-center gap-3 border-b border-subtle pb-4">
+        <div className="w-9 h-9 rounded-lg bg-brand-500/10 text-brand-600 flex items-center justify-center shrink-0 border border-brand-500/20">
+          <ImageIcon className="w-5 h-5" />
         </div>
         <div>
-          <h2 className="text-sm font-semibold text-main">Church Logo</h2>
-          <p className="text-xs text-muted">Shown across the app and in push notifications</p>
+          <h2 className="text-base font-semibold text-main leading-tight">Church Logo</h2>
+          <p className="text-xs text-muted mt-0.5">Shown across the app and in push notifications</p>
         </div>
       </div>
 
-      <div className="p-5 space-y-3.5">
+      <div className="space-y-4">
+        {/* Error Alert */}
         {error && (
-          <div className="flex items-start gap-2 p-3 text-xs rounded-lg bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400">
-            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-red-500" />
-            <span className="leading-snug">{error}</span>
+          <div className="flex items-center gap-2 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-600 dark:text-red-400 text-xs font-medium animate-in fade-in duration-200">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>{error}</span>
           </div>
         )}
 
+        {/* Content Body */}
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-xl bg-app border border-subtle flex items-center justify-center overflow-hidden shrink-0">
+          {/* Logo Preview */}
+          <div className="relative w-16 h-16 rounded-xl bg-app border border-subtle overflow-hidden flex items-center justify-center shrink-0 shadow-inner">
             {currentLogoUrl ? (
               <img src={currentLogoUrl} alt="Church logo" className="w-full h-full object-cover" />
             ) : (
-              <ImageIcon className="w-6 h-6 text-muted" />
+              <ImageIcon className="w-7 h-7 text-muted" />
             )}
           </div>
 
+          {/* Upload Controls */}
           {canEdit && (
-            <div>
+            <div className="space-y-1.5 flex-1">
               <input
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"
                 onChange={handleFileSelect}
-                className="hidden"
                 id="logo-upload"
+                disabled={uploading}
+                className="hidden"
               />
               <label
                 htmlFor="logo-upload"
-                className="inline-flex items-center gap-1.5 px-3 py-2 bg-surface hover:bg-slate-100 dark:hover:bg-slate-800 border border-subtle text-main text-xs font-medium rounded-lg cursor-pointer transition-colors"
+                className={`inline-flex items-center gap-2 px-3.5 py-1.5 bg-app hover:bg-subtle border border-subtle text-main font-semibold text-xs rounded-lg cursor-pointer transition-colors shadow-sm select-none ${
+                  uploading ? 'opacity-60 pointer-events-none' : ''
+                }`}
               >
                 {uploading ? (
                   <>
-                    <Spinner size="sm" />
+                    <Spinner size="sm" className="text-brand-500" />
                     <span>Uploading...</span>
                   </>
                 ) : (
                   <>
-                    <Upload className="w-3.5 h-3.5" />
+                    <Upload className="w-3.5 h-3.5 text-muted" />
                     <span>{currentLogoUrl ? 'Change logo' : 'Upload logo'}</span>
                   </>
                 )}
               </label>
-              <p className="text-[10px] text-muted mt-1.5">PNG or JPG, up to 2MB</p>
+              <p className="text-[11px] text-muted">PNG or JPG, up to 2MB</p>
             </div>
           )}
         </div>
