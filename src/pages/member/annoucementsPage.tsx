@@ -1,4 +1,4 @@
-import { useAnnouncements } from '../../hooks/useAnnoucments';
+import { useAnnouncements } from '../../hooks/useAnnouncements';
 import AnnouncementCard from '../../components/annoucements/annoucnemtsCard';
 import { Megaphone } from 'lucide-react';
 import { Spinner } from '../../components/ui/Spinner';

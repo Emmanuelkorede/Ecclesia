@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
-import { useSubscription } from '../../hooks/useSubscirptionservcies';
+import { useSubscription } from '../../hooks/useSubscriptionServices';
 import { X, UploadCloud, AlertCircle, FileImage, CheckCircle2 } from 'lucide-react';
 import { Spinner } from '../../components/ui/Spinner';
 import type { PlanTier } from '../../types/domain.types';

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useSchedule } from '../../hooks/useSchedule';
-import { useGroups } from '../../hooks/useGoups';
+import { useGroups } from '../../hooks/useGroups';
 import { 
   Plus, 
   X, 

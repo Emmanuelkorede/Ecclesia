@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useSubscription } from '../../hooks/useSubscirptionservcies';
+import { useSubscription } from '../../hooks/useSubscriptionServices';
 import ProofUploaderModal from '../../components/billing/proofUploaderModal';
 import { getPlanLimits } from '../../utils/planLimits';
 import { formatEnumLabel } from '../../utils/formatters';

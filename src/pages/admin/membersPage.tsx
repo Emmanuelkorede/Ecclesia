@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useMemberships } from '../../hooks/useMemberShip';
+import { useMemberships } from '../../hooks/useMembership';
 import { useActiveOrg } from '../../hooks/useActiveOrg';
 import PlanLimitBanner from '../../components/billing/planLimitBanner';
 import { isSuperAdmin } from '../../utils/permissions';

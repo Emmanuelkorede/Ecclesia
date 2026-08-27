@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useActiveOrg } from '../../hooks/useActiveOrg';
 import { useAuth } from '../../hooks/useAuth';
-import { useAnnouncements } from '../../hooks/useAnnoucments';
+import { useAnnouncements } from '../../hooks/useAnnouncements';
 import { useEvents } from '../../hooks/useEvents';
 import { useOngoingSessionsRealtime } from '../../hooks/useongoingSessionRealtime';
 import * as attendanceService from '../../services/attendanceServices';

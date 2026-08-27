@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useMemberships } from '../../hooks/useMemberShip';
+import { useMemberships } from '../../hooks/useMembership';
 import { useAuth } from '../../hooks/useAuth';
 import * as attendanceService from '../../services/attendanceServices';
 import { Check, Search, UserCheck, UserX, AlertCircle } from 'lucide-react';

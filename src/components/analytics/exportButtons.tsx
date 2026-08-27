@@ -3,7 +3,7 @@ import autoTable from 'jspdf-autotable';
 import { formatShortDate } from '../../utils/dateHelpers';
 import type { AttendanceTrendPoint } from '../../services/analytics';
 import { canUsePdfExport, canUseCsvExport, getEffectivePlanForLimits } from '../../utils/planLimits';
-import { useSubscription } from '../../hooks/useSubscirptionservcies';
+import { useSubscription } from '../../hooks/useSubscriptionServices';
 
 interface Props {
   data: AttendanceTrendPoint[];

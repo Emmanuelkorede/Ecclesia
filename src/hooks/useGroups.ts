@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useActiveOrg } from './useActiveOrg';
-import { useSubscription } from './useSubscirptionservcies';
+import { useSubscription } from './useSubscriptionServices';
 import * as groupService from '../services/groupServices';
 import type { GroupWithDetails } from '../services/groupServices';
 import { isAtGroupLimit, getPlanLimits, getEffectivePlanForLimits } from '../utils/planLimits';

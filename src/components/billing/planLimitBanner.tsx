@@ -1,4 +1,4 @@
-import { useSubscription } from '../../hooks/useSubscirptionservcies';
+import { useSubscription } from '../../hooks/useSubscriptionServices';
 import { getPlanLimits, getEffectivePlanForLimits } from '../../utils/planLimits';
 import { formatEnumLabel } from '../../utils/formatters';
 import { useNavigate } from 'react-router';

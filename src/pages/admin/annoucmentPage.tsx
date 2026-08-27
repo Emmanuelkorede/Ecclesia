@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useAnnouncements } from '../../hooks/useAnnoucments';
-import { useGroups } from '../../hooks/useGoups';
+import { useAnnouncements } from '../../hooks/useAnnouncements';
+import { useGroups } from '../../hooks/useGroups';
 import { formatRelativeTime } from '../../utils/dateHelpers';
 import { 
   Plus, 

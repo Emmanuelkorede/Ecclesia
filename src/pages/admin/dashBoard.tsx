@@ -1,7 +1,7 @@
 import { useActiveOrg } from '../../hooks/useActiveOrg';
 import { useAnalytics } from '../../hooks/useAnalytics';
-import { useMemberships } from '../../hooks/useMemberShip';
-import { useGroups } from '../../hooks/useGoups';
+import { useMemberships } from '../../hooks/useMembership';
+import { useGroups } from '../../hooks/useGroups';
 import { useEvents } from '../../hooks/useEvents';
 import AttendanceLineChart from '../../components/analytics/attendanceLineCharts';
 import { Users, Layers, CalendarDays, TrendingUp } from 'lucide-react';

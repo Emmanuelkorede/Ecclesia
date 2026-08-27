@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useGroups } from '../../hooks/useGoups';
+import { useGroups } from '../../hooks/useGroups';
 import GroupCard from '../../components/groups/groupCard';
 import GroupMembersModal from '../../components/groups/groupMembersModal';
 import PlanLimitBanner from '../../components/billing/planLimitBanner';

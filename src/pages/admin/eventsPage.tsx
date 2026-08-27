@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useEvents } from '../../hooks/useEvents';
-import { useGroups } from '../../hooks/useGoups';
+import { useGroups } from '../../hooks/useGroups';
 import PlanLimitBanner from '../../components/billing/planLimitBanner';
 import { formatFullDate, formatTime } from '../../utils/dateHelpers';
 import { 

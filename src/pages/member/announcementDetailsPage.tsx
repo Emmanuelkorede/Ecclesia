@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router';
-import { useAnnouncements } from '../../hooks/useAnnoucments';
+import { useAnnouncements } from '../../hooks/useAnnouncements';
 import { formatFullDate } from '../../utils/dateHelpers';
 import { ArrowLeft } from 'lucide-react';
 import { Spinner } from '../../components/ui/Spinner';

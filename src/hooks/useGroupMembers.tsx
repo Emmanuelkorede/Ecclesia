@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useMemberships } from './useMemberShip';
+import { useMemberships } from './useMembership';
 import * as groupService from '../services/groupServices';
 import type { Database } from '../types/database.types';
 

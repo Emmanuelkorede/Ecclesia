@@ -1,4 +1,4 @@
-import { useSubscription } from '../../hooks/useSubscirptionservcies';
+import { useSubscription } from '../../hooks/useSubscriptionServices';
 import { useNavigate } from 'react-router';
 import { formatCurrency, formatEnumLabel } from '../../utils/formatters';
 import { formatFullDate } from '../../utils/dateHelpers';
