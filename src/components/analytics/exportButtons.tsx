@@ -4,6 +4,7 @@ import { formatShortDate } from '../../utils/dateHelpers';
 import type { AttendanceTrendPoint } from '../../services/analytics';
 import { canUsePdfExport, canUseCsvExport, getEffectivePlanForLimits } from '../../utils/planLimits';
 import { useSubscription } from '../../hooks/useSubscriptionServices';
+import { FileSpreadsheet, FileText } from 'lucide-react';
 
 interface Props {
   data: AttendanceTrendPoint[];
@@ -38,22 +39,24 @@ export default function ExportButtons({ data, orgName }: Props) {
   };
 
   return (
-    <div className="flex gap-3">
+    <div className="flex items-center gap-3">
       <button
         onClick={exportCsv}
         disabled={!canUseCsvExport(effectivePlan)}
-        className="px-4 py-2 text-sm font-medium rounded-lg border border-[var(--border-subtle)] text-[var(--text-main)] hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed"
+        className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg bg-surface border border-subtle text-main hover:bg-app transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
         title={!canUseCsvExport(effectivePlan) ? 'Upgrade your plan to export CSV' : undefined}
       >
-        Export CSV
+        <FileSpreadsheet className="w-4 h-4 text-brand-500" />
+        <span>Export CSV</span>
       </button>
       <button
         onClick={exportPdf}
         disabled={!canUsePdfExport(effectivePlan)}
-        className="px-4 py-2 text-sm font-medium rounded-lg bg-brand-600 hover:bg-brand-700 text-white disabled:opacity-40 disabled:cursor-not-allowed"
+        className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
         title={!canUsePdfExport(effectivePlan) ? 'Upgrade your plan to export PDF' : undefined}
       >
-        Export PDF
+        <FileText className="w-4 h-4" />
+        <span>Export PDF</span>
       </button>
     </div>
   );
