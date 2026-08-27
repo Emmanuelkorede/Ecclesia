@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import CustomEventAttendance from '../../components/attendance/customEventAttendance';
-import RecurringAttendance from '../../components/attendance/recurrringEventAttendance';
+import RecurringAttendance from '../../components/attendance/recurringEventAttendance';
 import { CalendarRange, Ticket } from 'lucide-react';
 
 type Tab = 'recurring' | 'custom';

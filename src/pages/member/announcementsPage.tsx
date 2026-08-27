@@ -1,5 +1,5 @@
 import { useAnnouncements } from '../../hooks/useAnnouncements';
-import AnnouncementCard from '../../components/annoucements/annoucnemtsCard';
+import AnnouncementCard from '../../components/announcements/announcementsCard';
 import { Megaphone } from 'lucide-react';
 import { Spinner } from '../../components/ui/Spinner';
 

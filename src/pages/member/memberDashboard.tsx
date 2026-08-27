@@ -5,7 +5,7 @@ import { useAnnouncements } from '../../hooks/useAnnouncements';
 import { useEvents } from '../../hooks/useEvents';
 import { useOngoingSessionsRealtime } from '../../hooks/useongoingSessionRealtime';
 import * as attendanceService from '../../services/attendanceServices';
-import AnnouncementCard from '../../components/annoucements/annoucnemtsCard';
+import AnnouncementCard from '../../components/announcements/announcementsCard';
 import { formatFullDate, formatTime } from '../../utils/dateHelpers';
 import { Spinner } from '../../components/ui/Spinner';
 import { useNavigate } from 'react-router';
