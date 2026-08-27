@@ -2,7 +2,7 @@ import { Route , Routes } from 'react-router'
 import './App.css'
 import ProfileCompletionPage from './pages/onboarding/profileCompletionPage' ;
 import ChoosePathPage from './pages/onboarding/choosePathPage';
-import ChurchRegistrationPage from './pages/onboarding/churhRegsirationPage';
+import ChurchRegistrationPage from './pages/onboarding/churchRegistrationPage';
 import MemberJoinPage from './pages/onboarding/membersJoinPage';
 import AuthPage from './pages/public/authPage';
 import ProtectedRoute from './routes/protectedRoute';
@@ -21,7 +21,7 @@ import AnalyticsPage from './pages/admin/analytics';
 import BillingPage from './pages/admin/billingPage';
 import PremiumPage from './pages/admin/premiumPage';
 import SermonsPage from './pages/admin/sermonsPage';
-import AnnouncementsPage from './pages/admin/annoucmentPage';
+import AnnouncementsPage from './pages/admin/announcementPage';
 import MemberDashboardPage from './pages/member/memberDashboard';
 import CheckInPage from './pages/member/checkinPage';
 import SchedulePage from './pages/admin/schedulePage';
@@ -31,10 +31,10 @@ import ProfilePage from './pages/member/profilePage';
 import MemberAnnouncementsPage from './pages/member/announcementsPage';
 import MemberSermonsPage from './pages/member/sermonsPage';
 
-import PaymentApprovalsPage from './pages/platFormOwner/paymentApprovalPage';
-import SaaSOverviewPage from './pages/platFormOwner/saasOverviewPage';
-import PlatformOwnerRoute from './routes/platformOwnnerRoute';
-import PlatformOwnerDeniedPage from './pages/platFormOwner/platformwonerdenied';
+import PaymentApprovalsPage from './pages/platformOwner/paymentApprovalPage';
+import SaaSOverviewPage from './pages/platformOwner/saasOverviewPage';
+import PlatformOwnerRoute from './routes/platformOwnerRoute';
+import PlatformOwnerDeniedPage from './pages/platformOwner/platformOwnerDenied';
 import MemberSchedulePage from './pages/member/schedulePage';
 
 function App() {

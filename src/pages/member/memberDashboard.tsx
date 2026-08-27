@@ -3,7 +3,7 @@ import { useActiveOrg } from '../../hooks/useActiveOrg';
 import { useAuth } from '../../hooks/useAuth';
 import { useAnnouncements } from '../../hooks/useAnnouncements';
 import { useEvents } from '../../hooks/useEvents';
-import { useOngoingSessionsRealtime } from '../../hooks/useongoingSessionRealtime';
+import { useOngoingSessionsRealtime } from '../../hooks/useOngoingSessionRealtime';
 import * as attendanceService from '../../services/attendanceServices';
 import AnnouncementCard from '../../components/announcements/announcementsCard';
 import { formatFullDate, formatTime } from '../../utils/dateHelpers';
