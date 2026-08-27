@@ -41,6 +41,11 @@ export default function RecurringAttendance() {
 
   const selectedSchedule = schedules.find((s) => s.id === selectedScheduleId);
 
+  const handleExpire = async () => {
+    await endSession();
+    loadSession();
+  };
+
   useEffect(() => {
     if (selectedScheduleId && sessionDate) {
       loadSession();
@@ -247,7 +252,7 @@ export default function RecurringAttendance() {
                       {session.passcode}
                     </div>
                     <div className="pt-2 border-t border-subtle/60 text-xs">
-                      <SessionCountdown expiresAt={session.expires_at} onExpire={() => loadSession()} />
+                      <SessionCountdown expiresAt={session.expires_at} onExpire={handleExpire} />
                     </div>
                   </div>
 

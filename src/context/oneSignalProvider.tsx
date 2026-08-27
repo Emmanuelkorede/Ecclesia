@@ -1,25 +1,25 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import OneSignal from 'react-onesignal';
 import { useAuth } from '../hooks/useAuth';
 import { useActiveOrg } from '../hooks/useActiveOrg';
-import { useState } from 'react';
 
-
-let initialized = false;
+let initializedOnceGlobally = false;
 
 export const OneSignalProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user } = useAuth();
+  const { user, initialized } = useAuth();
   const { activeOrg } = useActiveOrg();
   const [oneSignalReady, setOneSignalReady] = useState(false);
 
   useEffect(() => {
-    if (typeof window === 'undefined' || initialized) return;
-    initialized = true;
+    // Only initialize OneSignal once we actually have a logged-in user —
+    // never on the public landing/pricing/auth pages.
+    if (!initialized || !user || initializedOnceGlobally) return;
+    initializedOnceGlobally = true;
 
     OneSignal.init({
       appId: import.meta.env.VITE_ONESIGNAL_APP_ID,
     }).then(() => setOneSignalReady(true));
-  }, []);
+  }, [initialized, user]);
 
   useEffect(() => {
     if (!oneSignalReady || !user) return;

@@ -35,6 +35,11 @@ export default function CustomEventAttendance() {
 
   const selectedEvent = events.find((e) => e.id === selectedEventId);
 
+  const handleExpire = async () => {
+    await endSession();
+    loadActiveSession(); // refetch to show the now-closed summary view
+  };
+
   useEffect(() => {
     if (selectedEventId) {
       loadActiveSession();
@@ -228,7 +233,7 @@ export default function CustomEventAttendance() {
                       {session.passcode}
                     </div>
                     <div className="pt-2 border-t border-subtle/60 text-xs">
-                      <SessionCountdown expiresAt={session.expires_at} onExpire={() => loadActiveSession()} />
+                      <SessionCountdown expiresAt={session.expires_at} onExpire={handleExpire} />
                     </div>
                   </div>
 

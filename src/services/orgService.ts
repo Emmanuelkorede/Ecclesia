@@ -105,8 +105,6 @@ export async function uploadChurchLogo(orgId: string, file: File): Promise<strin
   const fileExt = file.name.split('.').pop();
   const filePath = `${orgId}/logo.${fileExt}`;
 
-  // upsert: true so re-uploading a new logo overwrites the old file
-  // instead of accumulating orphaned images in the bucket
   const { error: uploadError } = await supabase.storage
     .from('church-logos')
     .upload(filePath, file, { upsert: true });
@@ -115,12 +113,16 @@ export async function uploadChurchLogo(orgId: string, file: File): Promise<strin
 
   const { data: urlData } = supabase.storage.from('church-logos').getPublicUrl(filePath);
 
+  // Append a cache-busting timestamp so browsers treat this as a new
+  // image instead of serving a stale cached copy of the old logo.
+  const cacheBustedUrl = `${urlData.publicUrl}?t=${Date.now()}`;
+
   const { error: updateError } = await supabase
     .from('organizations')
-    .update({ logo_url: urlData.publicUrl })
+    .update({ logo_url: cacheBustedUrl })
     .eq('id', orgId);
 
   if (updateError) throw updateError;
 
-  return urlData.publicUrl;
+  return cacheBustedUrl;
 }

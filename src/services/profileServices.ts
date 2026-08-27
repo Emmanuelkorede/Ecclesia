@@ -34,3 +34,27 @@ export async function updateProfile(userId: string, payload: UpdateProfilePayloa
 
   if (error) throw error;
 }
+
+
+export async function uploadAvatar(userId: string, file: File): Promise<string> {
+  const fileExt = file.name.split('.').pop();
+  const filePath = `${userId}/avatar.${fileExt}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from('avatars')
+    .upload(filePath, file, { upsert: true });
+
+  if (uploadError) throw uploadError;
+
+  const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(filePath);
+  const cacheBustedUrl = `${urlData.publicUrl}?t=${Date.now()}`;
+
+  const { error: updateError } = await supabase
+    .from('profiles')
+    .update({ avatar_url: cacheBustedUrl })
+    .eq('id', userId);
+
+  if (updateError) throw updateError;
+
+  return cacheBustedUrl;
+}
