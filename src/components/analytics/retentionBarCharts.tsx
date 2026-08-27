@@ -10,6 +10,7 @@ export default function RetentionBarChart({ data }: Props) {
   }
 
   const chartData = data.map((d) => ({ name: d.groupName, attendees: d.attendeeCount }));
+  console.log('chartData:', chartData);
 
   return (
     <div className="w-full h-72">

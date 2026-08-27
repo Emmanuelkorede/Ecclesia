@@ -16,10 +16,10 @@ import EventsPage from './pages/admin/eventsPage';
 import MembersPage from './pages/admin/membersPage';
 import GroupsPage from './pages/admin/groupsPage';
 import SettingsPage from './pages/admin/settings';
-import AttendanceSessionPage from './pages/admin/attendaceSessionPage';
+import AttendanceSessionPage from './pages/admin/attendanceSessionPage';
 import AnalyticsPage from './pages/admin/analytics';
 import BillingPage from './pages/admin/billingPage';
-import PremiumPage from './pages/admin/premuimPage';
+import PremiumPage from './pages/admin/premiumPage';
 import SermonsPage from './pages/admin/sermonsPage';
 import AnnouncementsPage from './pages/admin/annoucmentPage';
 import MemberDashboardPage from './pages/member/memberDashboard';
@@ -28,14 +28,14 @@ import SchedulePage from './pages/admin/schedulePage';
 import AnnouncementDetailPage from './pages/member/announcementDetailsPage';
 import MyAttendancePage from './pages/member/myAttendance';
 import ProfilePage from './pages/member/profilePage';
-import MemberAnnouncementsPage from './pages/member/annoucementsPage';
-import MemberSermonsPage from './pages/member/serMonsPage';
+import MemberAnnouncementsPage from './pages/member/announcementsPage';
+import MemberSermonsPage from './pages/member/sermonsPage';
 
 import PaymentApprovalsPage from './pages/platFormOwner/paymentApprovalPage';
 import SaaSOverviewPage from './pages/platFormOwner/saasOverviewPage';
 import PlatformOwnerRoute from './routes/platformOwnnerRoute';
 import PlatformOwnerDeniedPage from './pages/platFormOwner/platformwonerdenied';
-import MemberSchedulePage from './pages/member/schedeulePage';
+import MemberSchedulePage from './pages/member/schedulePage';
 
 function App() {
 

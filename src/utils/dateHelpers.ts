@@ -38,13 +38,24 @@ export function formatTime(isoString: string): string {
 }
 
 // "26 Jul 2026" — compact form for tables
-export function formatShortDate(isoString: string): string {
-  return new Date(isoString).toLocaleDateString('en-NG', {
+// "26 Jul 2026" — compact form for tables and chart axis labels
+export function formatShortDate(dateInput: string): string {
+  if (!dateInput) return '';
+
+  // Plain "YYYY-MM-DD" strings (from session_date) need an explicit time
+  // appended, or some browsers/timezones parse them as invalid or shift by a day.
+  const isDateOnly = /^\d{4}-\d{2}-\d{2}$/.test(dateInput);
+  const date = new Date(isDateOnly ? `${dateInput}T00:00:00` : dateInput);
+
+  if (isNaN(date.getTime())) return dateInput;
+
+  return date.toLocaleDateString('en-NG', {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
   });
 }
+
 
 // Used by the AI Outreach absentee-detection query: "has this member missed
 // the last 3 mandatory events?" — returns a cutoff ISO string N days back
