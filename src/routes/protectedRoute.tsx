@@ -1,28 +1,20 @@
-import { Navigate , Outlet , useLocation } from 'react-router' ;
+import { Navigate, Outlet, useLocation } from 'react-router';
 import { useAuth } from '../hooks/useAuth';
+import { BrandLoader } from '../components/ui/BrandLoader'; // Adjust import path if needed
 
 export default function ProtectedRoute() {
-  const { isAuthenticated, initialized } = useAuth()
-  const location = useLocation()
-  // still checking localStorage — show nothing yet
+  const { isAuthenticated, initialized } = useAuth();
+  const location = useLocation();
+
   if (!initialized) {
-    return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100vh' 
-      }}>
-        <p>Loading...</p>
-      </div>
-    )
+    return <BrandLoader message="Verifying session..." />;
   }
 
-  // not logged in — send them to login
+  // Not logged in — send to login
   if (!isAuthenticated) {
-    return <Navigate to="/auth" state={{ from: location }}  replace />
+    return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
-  // logged in — render the page
-  return <Outlet />
+  // Logged in — render route
+  return <Outlet />;
 }

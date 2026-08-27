@@ -11,7 +11,7 @@ import ProtectedLayout from './components/layout/protectedLayout';
 import OnboardingGuard from './routes/onboardingGuard';
 import LandingPage from './pages/public/landingPage';
 import PricingPage from './pages/public/pricingPage';
-import DashboardPage from './pages/admin/dashBoard';
+import DashboardPage from './pages/admin/dashboard';
 import EventsPage from './pages/admin/eventsPage';
 import MembersPage from './pages/admin/membersPage';
 import GroupsPage from './pages/admin/groupsPage';

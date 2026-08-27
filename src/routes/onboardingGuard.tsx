@@ -2,6 +2,7 @@ import { Navigate, Outlet, useLocation } from 'react-router';
 import { useAuth } from '../hooks/useAuth';
 import { useProfile } from '../hooks/useProfile';
 import { useActiveOrg } from '../hooks/useActiveOrg';
+import { BrandLoader } from '../components/ui/BrandLoader'; // Adjust import path if needed
 
 export default function OnboardingGuard() {
   const { initialized } = useAuth();
@@ -10,16 +11,12 @@ export default function OnboardingGuard() {
   const location = useLocation();
 
   if (!initialized || profileLoading || orgLoading) {
-    return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <p>Loading...</p>
-      </div>
-    );
+    return <BrandLoader message="Setting up..." />;
   }
 
   const path = location.pathname;
 
-  // Profile incomplete — only /complete-profile is allowed, force everything else there
+  // Profile incomplete — force to /complete-profile
   if (!isComplete && path !== '/complete-profile') {
     return <Navigate to="/complete-profile" replace />;
   }
@@ -29,7 +26,7 @@ export default function OnboardingGuard() {
     return <Navigate to="/choose-path" replace />;
   }
 
-  // Already has a membership — no business being on any onboarding route at all
+  // Already has a membership — redirect away from onboarding
   if (memberships.length > 0) {
     const destination = role === 'member' ? '/member/dashboard' : '/admin/dashboard';
     return <Navigate to={destination} replace />;
