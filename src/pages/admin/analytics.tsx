@@ -132,8 +132,8 @@ export default function AnalyticsPage() {
                   >
                     <option value="" disabled>Select a schedule...</option>
                     {schedules.map((s) => (
-                      <option key={s.id} value={s.id}>
-                        {s.title}
+                      <option key={String(s.id)} value={String(s.id)}>
+                        {String(s.title ?? '')}
                       </option>
                     ))}
                   </select>
