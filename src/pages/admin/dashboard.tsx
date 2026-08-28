@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useActiveOrg } from '../../hooks/useActiveOrg';
 import { useAnalytics } from '../../hooks/useAnalytics';
-import { useMemberships } from '../../hooks/useMembership';
+import { useMemberships } from '../../hooks/useMembership'; 
 import { useGroups } from '../../hooks/useGroups';
 import { useEvents } from '../../hooks/useEvents';
 import AttendanceLineChart from '../../components/analytics/attendanceLineCharts';
@@ -19,7 +19,11 @@ export default function DashboardPage() {
 
   const [tab, setTab] = useState<Tab>('recurring');
 
-  const activeMembers = members.filter((m) => m.status === 'active').length;
+  // 2. Added type annotation to parameter 'm'
+  const activeMembers = members.filter(
+    (m: { status: string | null }) => m.status === 'active'
+  ).length;
+
   const upcomingEvents = events.filter((e) => new Date(e.start_time) > new Date()).length;
 
   const stats = [
