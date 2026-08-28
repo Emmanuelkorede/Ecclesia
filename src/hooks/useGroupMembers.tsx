@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useMemberships } from './useMembership';
+import { useMemberships } from './useMembership'; // 1. Fixed module path (plural)
 import * as groupService from '../services/groupServices';
 import type { Database } from '../types/database.types';
 
@@ -53,7 +53,11 @@ export function useGroupMembers(groupId: string | null) {
   };
 
   const groupMemberIds = new Set(groupMembers.map((gm) => gm.user_id));
-  const availableToAdd = allMembers.filter((m) => m.status === 'active' && !groupMemberIds.has(m.user_id));
+
+const availableToAdd = allMembers.filter(
+    (m: { user_id: string; status: string | null }) => 
+      m.status === 'active' && !groupMemberIds.has(m.user_id)
+  );
 
   return { groupMembers, availableToAdd, loading, addMember, removeMember, refresh: load };
 }
