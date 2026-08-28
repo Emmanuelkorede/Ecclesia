@@ -36,6 +36,7 @@ import SaaSOverviewPage from './pages/platformOwner/saasOverviewPage';
 import PlatformOwnerRoute from './routes/platformOwnerRoute';
 import PlatformOwnerDeniedPage from './pages/platformOwner/platformOwnerDenied';
 import MemberSchedulePage from './pages/member/schedulePage';
+import ContactPage from './pages/public/contactPage';
 
 function App() {
 
@@ -46,6 +47,7 @@ function App() {
         <Route path="/auth" element={<AuthPage />} />
         <Route path="/" element={<LandingPage />} />
         <Route path='/pricing' element={<PricingPage />} />
+        <Route path='/contact' element={<ContactPage />} />
       </Route>
 
       <Route element={<ProtectedRoute />}>
