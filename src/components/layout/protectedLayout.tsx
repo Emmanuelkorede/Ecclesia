@@ -9,6 +9,9 @@ import MemberNav from './memberNav';
 import MemberBottomNav from './memberBottomNav';
 import OrgSwitcher from './orgSwitcher';
 
+// PWA Components
+import InstallBanner from '../pwa/InstallBanner';
+
 // UI Components
 import { BrandLoader } from '../../components/ui/BrandLoader';
 import { Logo } from '../../components/ui/Logo';
@@ -50,6 +53,9 @@ export default function ProtectedLayout() {
           <OrgSwitcher />
         </div>
       </header>
+
+      {/* PWA Install Prompt Banner */}
+      <InstallBanner />
 
       {/* 2. Content Area (Sidebar + Main) */}
       <div className="flex flex-1 min-w-0 relative">
