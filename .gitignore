@@ -7,6 +7,10 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# .gitignore
+dev-dist/
+dist/
+
 # ev
 .env
 .env.local
