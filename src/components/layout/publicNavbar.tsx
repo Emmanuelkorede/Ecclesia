@@ -1,73 +1,170 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router';
 import { Menu, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Logo } from '../ui/Logo';
 
 export default function PublicNavbar() {
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const scrollTo = (id: string) => {
-    setOpen(false);
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Updated to check both pathname and hash so Pricing and FAQ highlight separately
+  const isActive = (path: string, hash: string = '') => {
+    return location.pathname === path && location.hash === hash;
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-[var(--surface)]/90 backdrop-blur border-b border-[var(--border)] transition-colors">
-      <div className="max-w-6xl mx-auto flex items-center justify-between px-4 md:px-6 py-4">
-        <Link to="/" className="flex items-center">
-          <Logo className="h-7 w-auto text-[var(--text-h)]" />
+    <header className="fixed top-0 inset-x-0 z-50 pt-4 px-4 sm:px-6 pointer-events-none">
+      <div 
+        className={`pointer-events-auto max-w-6xl mx-auto rounded-full transition-all duration-300 ${
+          scrolled 
+            ? 'bg-[#0B0A10]/85 border border-white/[0.12] shadow-[0_8px_32px_rgba(0,0,0,0.5)] backdrop-blur-2xl' 
+            : 'bg-[#12111A]/60 border border-white/[0.08] backdrop-blur-xl shadow-lg shadow-black/20'
+        } px-4 sm:px-6 py-2.5 flex items-center justify-between`}
+      >
+        {/* Logo */}
+        <Link to="/" className="flex items-center hover:opacity-80 transition-opacity pl-1">
+          <Logo className="h-10 w-auto text-violet-500" />
         </Link>
 
-        <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-[var(--text-h)]">
-          <button onClick={() => scrollTo('features')} className="hover:text-brand-600 transition-colors cursor-pointer">Features</button>
-          <Link to="/pricing" className="hover:text-brand-600 transition-colors">Pricing</Link>
-          <Link to="/pricing#faq" className="hover:text-brand-600 transition-colors">FAQ</Link>
-          <Link to="/contact" className="hover:text-brand-600 transition-colors">Contact</Link>
+        {/* Floating Centered Pill Navigation */}
+        <nav className="hidden md:flex items-center bg-white/[0.04] border border-white/[0.06] p-1 rounded-full">
+          <Link
+            to="/"
+            className={`px-5 py-2 rounded-full text-xs font-semibold transition-all duration-200 ${
+              isActive('/')
+                ? 'bg-white text-[#0B0A10] shadow-md font-bold'
+                : 'text-white/70 hover:text-white'
+            }`}
+          >
+            Home
+          </Link>
+          <Link
+            to="/pricing"
+            className={`px-5 py-2 rounded-full text-xs font-semibold transition-all duration-200 ${
+              isActive('/pricing')
+                ? 'bg-white text-[#0B0A10] shadow-md font-bold'
+                : 'text-white/70 hover:text-white'
+            }`}
+          >
+            Pricing
+          </Link>
+          <Link
+            to="/pricing#faq"
+            className={`px-5 py-2 rounded-full text-xs font-semibold transition-all duration-200 ${
+              isActive('/pricing', '#faq')
+                ? 'bg-white text-[#0B0A10] shadow-md font-bold'
+                : 'text-white/70 hover:text-white'
+            }`}
+          >
+            FAQ
+          </Link>
+          <Link
+            to="/contact"
+            className={`px-5 py-2 rounded-full text-xs font-semibold transition-all duration-200 ${
+              isActive('/contact')
+                ? 'bg-white text-[#0B0A10] shadow-md font-bold'
+                : 'text-white/70 hover:text-white'
+            }`}
+          >
+            Contact
+          </Link>
         </nav>
 
-        <div className="hidden md:flex items-center gap-3">
+        {/* Right Actions */}
+        <div className="hidden md:flex items-center gap-4">
           <button
             onClick={() => navigate('/auth')}
-            className="text-sm font-medium text-[var(--text-h)] px-4 py-2 hover:opacity-80 transition-opacity cursor-pointer"
+            className="text-xs font-semibold text-white/80 hover:text-white transition-colors cursor-pointer px-2"
           >
-            Log In
+            Sign in
           </button>
           <button
             onClick={() => navigate('/auth')}
-            className="text-sm font-medium bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white rounded-xl px-4 py-2 shadow-sm transition-all cursor-pointer"
+            className="relative group bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white text-xs font-semibold rounded-full px-5 py-2.5 transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] shadow-lg shadow-violet-500/25 cursor-pointer"
           >
-            Get Started
+            Get started
           </button>
         </div>
 
-        <button className="md:hidden text-[var(--text-h)] cursor-pointer" onClick={() => setOpen(!open)} aria-label="Toggle Menu">
-          {open ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        {/* Mobile Toggle */}
+        <button 
+          className="md:hidden p-2 text-white/70 hover:text-white rounded-full transition-colors cursor-pointer" 
+          onClick={() => setOpen(!open)} 
+          aria-label="Toggle Menu"
+        >
+          {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
       </div>
 
-      {open && (
-        <div className="md:hidden px-4 pb-5 pt-2 flex flex-col gap-3 text-sm font-medium text-[var(--text-h)] bg-[var(--surface)] border-b border-[var(--border)]">
-          <button onClick={() => scrollTo('features')} className="text-left py-1.5">Features</button>
-          <Link to="/pricing" onClick={() => setOpen(false)} className="py-1.5">Pricing</Link>
-          <Link to="/pricing#faq" onClick={() => setOpen(false)} className="py-1.5">FAQ</Link>
-          <Link to="/contact" onClick={() => setOpen(false)} className="py-1.5">Contact</Link>
-          <div className="flex flex-col gap-2 pt-2 border-t border-[var(--border)]">
-            <button
-              onClick={() => navigate('/auth')}
-              className="w-full text-center py-2.5 rounded-xl border border-[var(--border)] text-[var(--text-h)]"
-            >
-              Log In
-            </button>
-            <button
-              onClick={() => navigate('/auth')}
-              className="w-full bg-brand-600 text-white rounded-xl py-2.5 shadow-sm"
-            >
-              Get Started
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Mobile Menu Dropdown */}
+      <AnimatePresence>
+        {open && (
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95, y: -10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: -10 }}
+            transition={{ duration: 0.2, ease: "easeInOut" }}
+            className="pointer-events-auto max-w-6xl mx-auto mt-3 rounded-3xl bg-[#0B0A10]/95 backdrop-blur-2xl border border-white/[0.12] p-6 shadow-2xl overflow-hidden"
+          >
+            <div className="flex flex-col space-y-4 text-sm font-medium">
+              <Link 
+                to="/" 
+                onClick={() => setOpen(false)} 
+                className={`py-1 transition-colors ${isActive('/') ? 'text-white font-bold' : 'text-white/80 hover:text-white'}`}
+              >
+                Home
+              </Link>
+              <Link 
+                to="/pricing" 
+                onClick={() => setOpen(false)} 
+                className={`py-1 transition-colors ${isActive('/pricing') ? 'text-white font-bold' : 'text-white/80 hover:text-white'}`}
+              >
+                Pricing
+              </Link>
+              <Link 
+                to="/pricing#faq" 
+                onClick={() => setOpen(false)} 
+                className={`py-1 transition-colors ${isActive('/pricing', '#faq') ? 'text-white font-bold' : 'text-white/80 hover:text-white'}`}
+              >
+                FAQ
+              </Link>
+              <Link 
+                to="/contact" 
+                onClick={() => setOpen(false)} 
+                className={`py-1 transition-colors ${isActive('/contact') ? 'text-white font-bold' : 'text-white/80 hover:text-white'}`}
+              >
+                Contact
+              </Link>
+              
+              <div className="flex flex-col gap-3 pt-4 border-t border-white/[0.08]">
+                <button
+                  onClick={() => { setOpen(false); navigate('/auth'); }}
+                  className="w-full text-center py-2.5 rounded-full border border-white/[0.12] bg-white/[0.03] text-white font-medium hover:bg-white/[0.08] transition-colors cursor-pointer text-xs"
+                >
+                  Sign in
+                </button>
+                <button
+                  onClick={() => { setOpen(false); navigate('/auth'); }}
+                  className="w-full text-center bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white rounded-full py-2.5 text-xs font-semibold shadow-lg shadow-violet-500/25 transition-all cursor-pointer"
+                >
+                  Get started
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 }

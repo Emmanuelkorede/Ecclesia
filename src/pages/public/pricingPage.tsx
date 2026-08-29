@@ -1,7 +1,9 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router';
+import { motion, AnimatePresence } from 'framer-motion';
 import PublicNavbar from '../../components/layout/publicNavbar';
-import { Check, ChevronDown, Sparkles } from 'lucide-react';
+import { Check, ChevronDown, Sparkles, HelpCircle, ShieldCheck, Zap } from 'lucide-react';
+import { Logo } from '../../components/ui/Logo';
 
 const plans = [
   {
@@ -23,7 +25,6 @@ const plans = [
     name: 'Growth',
     price: '₦10,500',
     period: '/month',
-    promo: '₦5,250 for 1st month (50% off)',
     audience: 'Mid-size churches (20–150 members)',
     cta: 'Start Growth',
     members: 'Up to 150 members',
@@ -39,15 +40,14 @@ const plans = [
     name: 'Enterprise',
     price: '₦29,500',
     period: '/month',
-    promo: '₦14,750 for 1st month (50% off)',
-    audience: 'Large churches & multi-branch networks',
+    audience: 'Large churches & multi-branch',
     cta: 'Start Enterprise',
     members: 'Unlimited members',
     events: 'Unlimited events',
     groups: 'Unlimited groups',
     attendance: 'Passcode + QR + Self check-in',
     ai: 'Unlimited AI drafts',
-    push: 'Push + Direct SMS/WhatsApp',
+    push: 'Push + Direct SMS',
     analytics: 'Full analytics + custom PDF export',
     highlighted: false,
   },
@@ -57,178 +57,284 @@ const faqs = [
   {
     q: 'How do expiring attendance codes work?',
     a: 'When you launch an attendance session, we generate a secure code that automatically expires after 10-15 minutes, preventing sharing or reuse after the service window closes.',
+    tag: 'Security'
   },
   {
     q: 'Can I track Choir and Youth attendance separately from general service?',
     a: 'Yes. Any event can be restricted to a specific sub-ministry or group — only members tagged in that group can check in, tracking attendance independently.',
-  },
-  {
-    q: 'How does the 50% first-month promotion work?',
-    a: 'When you upgrade to Growth or Enterprise for the first time, your initial month is billed at half price when submitting your bank transfer payment proof.',
+    tag: 'Ministries'
   },
   {
     q: 'How does bank transfer payment work?',
     a: 'You make a direct bank transfer for your chosen plan, then upload a screenshot of your transfer receipt in your dashboard. Our finance team verifies and activates your subscription quickly.',
+    tag: 'Billing'
   },
   {
     q: 'What happens if my subscription expires?',
     a: 'Your existing data stays fully safe and intact. Actions exceeding free plan limits are temporarily paused until you renew — nothing is ever deleted.',
+    tag: 'Account'
   },
   {
     q: 'Can I switch plans later?',
-    a: 'Yes, you can upgrade or adjust your tier at any time from your Billing page.',
+    a: 'Yes, you can upgrade or adjust your tier at any time from your Billing page with prorated adjustments.',
+    tag: 'Billing'
   },
 ];
 
-function FeatureRow({ label, free, growth, enterprise }: { label: string; free: string; growth: string; enterprise: string }) {
+function FeatureRow({ label, free, growth, enterprise } : { label: string; free: string; growth: string; enterprise: string; }) {
   return (
-    <tr className="border-t border-[var(--border)]">
-      <td className="px-5 py-4 text-sm text-[var(--text-h)] font-medium">{label}</td>
-      <td className="px-5 py-4 text-sm text-[var(--text)] text-center">{free}</td>
-      <td className="px-5 py-4 text-sm text-[var(--text)] text-center font-semibold text-brand-600 dark:text-brand-400">{growth}</td>
-      <td className="px-5 py-4 text-sm text-[var(--text)] text-center">{enterprise}</td>
+    <tr className="border-t border-white/[0.05] hover:bg-white/[0.02] transition-colors group">
+      <td className="px-5 py-4 text-sm text-white/90 font-medium flex items-center gap-2">
+        <span className="w-1.5 h-1.5 rounded-full bg-violet-500/40 group-hover:bg-violet-400 transition-colors" />
+        {label}
+      </td>
+      <td className="px-5 py-4 text-sm text-white/60 text-center">{free}</td>
+      <td className="px-5 py-4 text-sm text-center font-bold text-violet-300 bg-violet-500/[0.04] border-x border-violet-500/10 shadow-[inset_0_0_15px_rgba(139,92,246,0.03)]">{growth}</td>
+      <td className="px-5 py-4 text-sm text-white/70 text-center font-medium">{enterprise}</td>
     </tr>
   );
 }
 
 export default function PricingPage() {
   const navigate = useNavigate();
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const location = useLocation();
+  const [openFaq, setOpenFaq] = useState<number | null>(0);
+
+  useEffect(() => {
+    if (location.hash) {
+      const element = document.querySelector(location.hash);
+      if (element) {
+        setTimeout(() => {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+      }
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [location.hash]);
 
   return (
-    <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] transition-colors duration-200">
+    <div className="min-h-screen bg-[#0B0A10] text-white/70 selection:bg-violet-500/30 font-sans overflow-hidden flex flex-col">
       <PublicNavbar />
 
-      {/* Header Section */}
-      <section className="max-w-6xl mx-auto px-4 md:px-6 pt-20 pb-12 text-center">
-        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[var(--text-h)] tracking-tight">
-          Simple, transparent pricing for Nigerian churches
-        </h1>
-        <p className="text-[var(--text)] mt-4 max-w-xl mx-auto text-base">
-          Start free and scale up as your congregation expands. No credit card required to get started.
-        </p>
+      {/* Ambient Background Glows */}
+      <motion.div className="fixed inset-0 z-0 pointer-events-none flex justify-center items-start">
+        <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-violet-600/10 blur-[120px]" />
+        <div className="absolute top-[20%] right-[-10%] w-[40vw] h-[40vw] rounded-full bg-indigo-600/10 blur-[120px]" />
+      </motion.div>
 
-        <div className="inline-flex items-center gap-2 bg-brand-500/10 border border-brand-500/20 rounded-xl px-4 py-3 mt-8 text-sm text-brand-600 dark:text-brand-400 font-medium">
-          <Sparkles className="w-4 h-4 shrink-0" />
-          <span>Get 50% off your first month on Growth or Enterprise plans!</span>
-        </div>
-      </section>
+      <main className="relative z-10 flex-grow pt-24 md:pt-32 pb-20">
+        
+        {/* Header Section */}
+        <section className="max-w-4xl mx-auto px-6 text-center mb-16">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.03] border border-white/[0.08] backdrop-blur-md mb-6 shadow-inner">
+            <Sparkles className="w-3.5 h-3.5 text-violet-400" />
+            <span className="text-[11px] font-semibold uppercase tracking-widest text-violet-200">Investment in Growth</span>
+          </div>
+          <motion.h1 
+            style={{ fontFamily: "'Outfit', sans-serif" }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-4xl md:text-5xl lg:text-6xl font-black text-white tracking-tight mb-4 leading-tight"
+          >
+            Simple pricing built for <br className="hidden md:px-0" />
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-violet-400 via-fuchsia-400 to-indigo-400 drop-shadow-lg">
+              modern ministries.
+            </span>
+          </motion.h1>
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="text-sm md:text-base text-white/60 max-w-xl mx-auto leading-relaxed"
+          >
+            Scale your engagement tracking seamlessly with zero hidden fees. Pick a tier that fits your congregation size.
+          </motion.p>
+        </section>
 
-      {/* Plan Cards */}
-      <section className="max-w-6xl mx-auto px-4 md:px-6 pb-20">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
-          {plans.map((plan) => (
-            <div
-              key={plan.name}
-              className={`rounded-2xl p-7 border flex flex-col justify-between shadow-sm transition-all bg-[var(--surface)] ${
-                plan.highlighted
-                  ? 'border-brand-500 ring-2 ring-brand-500/30 shadow-xl relative'
-                  : 'border-[var(--border)]'
-              }`}
-            >
-              {plan.highlighted && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-brand-600 text-white text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full shadow-md">
-                  Most Popular for Churches
-                </div>
-              )}
-
-              <div>
-                <h3 className="text-2xl font-bold text-[var(--text-h)]">{plan.name}</h3>
-                <p className="text-xs text-[var(--text)] mt-1 min-h-[2rem]">{plan.audience}</p>
-                
-                <div className="flex items-baseline gap-1 mt-6">
-                  <span className="text-4xl font-extrabold text-[var(--text-h)] tracking-tight">{plan.price}</span>
-                  <span className="text-sm text-[var(--text)]">{plan.period}</span>
-                </div>
-                {plan.promo && (
-                  <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 mt-1.5">
-                    🎉 {plan.promo}
-                  </p>
+        {/* Compact Plan Cards */}
+        <section className="max-w-6xl mx-auto px-6 mb-24">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 lg:gap-6 items-stretch">
+            {plans.map((plan, i) => (
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 * i }}
+                key={plan.name}
+                className={`relative rounded-3xl p-6 lg:p-8 flex flex-col h-full transition-all duration-300 group ${
+                  plan.highlighted
+                    ? 'bg-[#12111A] border-2 border-violet-500/50 shadow-[0_0_40px_rgba(139,92,246,0.18)] lg:-translate-y-2 lg:scale-[1.02] z-10'
+                    : 'bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.04] hover:border-white/[0.12]'
+                }`}
+              >
+                {plan.highlighted && (
+                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-[10px] font-extrabold uppercase tracking-widest px-4 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
+                    <Zap className="w-3 h-3 fill-current" />
+                    Most Popular Choice
+                  </div>
                 )}
+                
+                {/* Ambient Card Hover Glow */}
+                <div className="absolute top-0 right-0 w-48 h-48 bg-violet-500/10 rounded-full blur-[50px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+
+                <div className="mb-6 relative z-10">
+                  <h3 className="text-xl font-bold text-white mb-1">{plan.name}</h3>
+                  <p className="text-[13px] text-white/50 min-h-[2.5rem] leading-snug">{plan.audience}</p>
+                  
+                  <div className="flex items-baseline gap-1 mt-4">
+                    <span style={{ fontFamily: "'Outfit', sans-serif" }} className="text-4xl font-black text-white tracking-tight">{plan.price}</span>
+                    <span className="text-[13px] font-medium text-white/40">{plan.period}</span>
+                  </div>
+                </div>
 
                 <button
                   onClick={() => navigate('/auth')}
-                  className={`w-full mt-7 rounded-xl py-3 text-sm font-semibold transition-all cursor-pointer shadow-sm ${
+                  className={`w-full relative group/btn rounded-full py-3 text-sm font-bold transition-all mb-6 cursor-pointer ${
                     plan.highlighted
-                      ? 'bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white shadow-brand-600/20'
-                      : 'border border-[var(--border)] text-[var(--text-h)] hover:bg-slate-100 dark:hover:bg-slate-800/80 bg-[var(--bg)]'
+                      ? 'bg-white text-[#0B0A10] hover:scale-[1.02] active:scale-[0.98]'
+                      : 'border border-white/[0.12] bg-white/[0.02] text-white hover:bg-white/[0.08]'
                   }`}
                 >
-                  {plan.cta}
+                  {plan.highlighted && (
+                    <span className="absolute inset-0 rounded-full shadow-[0_0_20px_rgba(255,255,255,0.3)] group-hover/btn:shadow-[0_0_35px_rgba(255,255,255,0.5)] transition-shadow duration-500" />
+                  )}
+                  <span className="relative z-10">{plan.cta}</span>
                 </button>
 
-                <ul className="mt-8 space-y-3.5 text-sm text-[var(--text)]">
-                  <li className="flex items-center gap-2.5"><Check className="w-4 h-4 text-brand-600 dark:text-brand-400 shrink-0" /> {plan.members}</li>
-                  <li className="flex items-center gap-2.5"><Check className="w-4 h-4 text-brand-600 dark:text-brand-400 shrink-0" /> {plan.events}</li>
-                  <li className="flex items-center gap-2.5"><Check className="w-4 h-4 text-brand-600 dark:text-brand-400 shrink-0" /> {plan.groups}</li>
-                  <li className="flex items-center gap-2.5"><Check className="w-4 h-4 text-brand-600 dark:text-brand-400 shrink-0" /> {plan.attendance}</li>
-                  <li className="flex items-center gap-2.5"><Check className="w-4 h-4 text-brand-600 dark:text-brand-400 shrink-0" /> {plan.ai}</li>
-                  <li className="flex items-center gap-2.5"><Check className="w-4 h-4 text-brand-600 dark:text-brand-400 shrink-0" /> {plan.push}</li>
-                  <li className="flex items-center gap-2.5"><Check className="w-4 h-4 text-brand-600 dark:text-brand-400 shrink-0" /> {plan.analytics}</li>
+                <ul className="space-y-3 flex-grow relative z-10">
+                  {[plan.members, plan.events, plan.groups, plan.attendance, plan.ai, plan.push, plan.analytics].map((feature, idx) => (
+                    <li key={idx} className="flex items-start gap-2.5 text-[13px] text-white/75">
+                      <div className={`mt-0.5 w-4 h-4 rounded-full flex items-center justify-center shrink-0 ${plan.highlighted ? 'bg-violet-500/20 text-violet-300 border border-violet-500/30' : 'bg-white/[0.05] text-white/40'}`}>
+                        <Check className="w-2.5 h-2.5" />
+                      </div>
+                      <span className="leading-tight font-medium">{feature}</span>
+                    </li>
+                  ))}
                 </ul>
-              </div>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+
+        {/* Upgraded Preppy Comparison Table */}
+        <section className="max-w-5xl mx-auto px-6 mb-28">
+          <div className="text-center mb-10">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.03] border border-white/[0.06] mb-3">
+              <ShieldCheck className="w-3.5 h-3.5 text-violet-400" />
+              <span className="text-[10px] uppercase font-bold tracking-widest text-white/60">Matrix Breakdown</span>
             </div>
-          ))}
-        </div>
-      </section>
+            <h2 style={{ fontFamily: "'Outfit', sans-serif" }} className="text-3xl font-black text-white tracking-tight">Compare plan capabilities</h2>
+          </div>
+          
+          <div className="bg-[#12111A]/90 border border-white/[0.08] rounded-3xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-x-auto backdrop-blur-xl">
+            <table className="w-full text-left border-collapse min-w-[750px]">
+              <thead className="bg-white/[0.03] border-b border-white/[0.08]">
+                <tr>
+                  <th className="px-5 py-5 text-xs font-bold uppercase tracking-wider text-white/40 w-[28%]">Core Feature</th>
+                  <th className="px-5 py-5 text-xs font-bold uppercase tracking-wider text-white/60 text-center w-[24%]">Free Tier</th>
+                  <th className="px-5 py-5 text-xs font-bold uppercase tracking-wider text-violet-300 text-center w-[24%] bg-violet-500/[0.06] border-x border-violet-500/10">Growth Tier</th>
+                  <th className="px-5 py-5 text-xs font-bold uppercase tracking-wider text-white/60 text-center w-[24%]">Enterprise</th>
+                </tr>
+              </thead>
+              <tbody>
+                <FeatureRow label="Active Member Limit" free="20 Members" growth="150 Members" enterprise="Unlimited" />
+                <FeatureRow label="Monthly Events" free="4 Events" growth="20 Events" enterprise="Unlimited" />
+                <FeatureRow label="Ministry Sub-groups" free="Max 2 Groups" growth="Max 10 Groups" enterprise="Unlimited Groups" />
+                <FeatureRow label="Attendance Protocols" free="Passcode, Manual" growth="Passcode + Dynamic QR" enterprise="Passcode + QR + Self Check-in" />
+                <FeatureRow label="AI Absentee Outreach" free="5 Drafts / mo" growth="100 Drafts / mo" enterprise="Unlimited Custom AI" />
+                <FeatureRow label="Push & Notifications" free="Web Announcements" growth="Native Push Alerting" enterprise="Push + Direct SMS & WhatsApp" />
+                <FeatureRow label="Data Analytics & Exports" free="Basic Dashboard" growth="Advanced + CSV Export" enterprise="Full Suite + Custom PDF" />
+              </tbody>
+            </table>
+          </div>
+        </section>
 
-      {/* Comparison Table */}
-      <section className="max-w-5xl mx-auto px-4 md:px-6 pb-24">
-        <h2 className="text-2xl font-bold text-[var(--text-h)] mb-6 tracking-tight text-center">Compare plans in detail</h2>
-        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl overflow-hidden shadow-sm overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[600px]">
-            <thead className="bg-slate-50 dark:bg-slate-800/50 border-b border-[var(--border)]">
-              <tr>
-                <th className="px-5 py-4 text-sm font-semibold text-[var(--text-h)]">Feature</th>
-                <th className="px-5 py-4 text-sm font-semibold text-[var(--text-h)] text-center">Free</th>
-                <th className="px-5 py-4 text-sm font-semibold text-brand-600 dark:text-brand-400 text-center">Growth</th>
-                <th className="px-5 py-4 text-sm font-semibold text-[var(--text-h)] text-center">Enterprise</th>
-              </tr>
-            </thead>
-            <tbody>
-              <FeatureRow label="Member limit" free="20" growth="150" enterprise="Unlimited" />
-              <FeatureRow label="Events / month" free="4" growth="20" enterprise="Unlimited" />
-              <FeatureRow label="Groups / ministries" free="2" growth="10" enterprise="Unlimited" />
-              <FeatureRow label="Attendance methods" free="Passcode, Manual" growth="+ Dynamic QR" enterprise="+ Self check-in" />
-              <FeatureRow label="AI outreach drafts" free="5/month" growth="100/month" enterprise="Unlimited" />
-              <FeatureRow label="Notifications" free="Web announcements" growth="Push notifications" enterprise="Push + SMS/WhatsApp" />
-              <FeatureRow label="Analytics & export" free="Basic dashboard" growth="Advanced + CSV" enterprise="Full + custom PDF" />
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      {/* FAQ Accordion */}
-      <section id="faq" className="max-w-3xl mx-auto px-4 md:px-6 pb-28">
-        <h2 className="text-2xl font-bold text-[var(--text-h)] text-center mb-10 tracking-tight">
-          Frequently asked questions
-        </h2>
-        <div className="space-y-4">
-          {faqs.map((faq, i) => (
-            <div
-              key={i}
-              className="bg-[var(--surface)] border border-[var(--border)] rounded-xl overflow-hidden shadow-xs transition-all"
-            >
-              <button
-                onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                className="w-full flex items-center justify-between px-5 py-4 text-left cursor-pointer"
+        {/* Upgraded FAQ Accordion */}
+        <section id="faq" className="max-w-3xl mx-auto px-6 scroll-mt-24">
+          <div className="text-center mb-10">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.03] border border-white/[0.06] mb-3">
+              <HelpCircle className="w-3.5 h-3.5 text-violet-400" />
+              <span className="text-[10px] uppercase font-bold tracking-widest text-white/60">Got Questions?</span>
+            </div>
+            <h2 style={{ fontFamily: "'Outfit', sans-serif" }} className="text-3xl font-black text-white tracking-tight">Everything you need to know</h2>
+          </div>
+          
+          <div className="space-y-3.5">
+            {faqs.map((faq, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.05 }}
+                className={`border rounded-2xl overflow-hidden transition-all duration-300 ${
+                  openFaq === i 
+                    ? 'bg-[#12111A] border-violet-500/40 shadow-[0_4px_25px_rgba(139,92,246,0.08)]' 
+                    : 'bg-white/[0.02] border-white/[0.06] hover:border-white/[0.12] hover:bg-white/[0.03]'
+                }`}
               >
-                <span className="text-sm font-semibold text-[var(--text-h)]">{faq.q}</span>
-                <ChevronDown
-                  className={`w-4 h-4 text-[var(--text)] shrink-0 transition-transform duration-200 ${
-                    openFaq === i ? 'rotate-180' : ''
-                  }`}
-                />
-              </button>
-              {openFaq === i && (
-                <div className="px-5 pb-4 pt-1 text-sm text-[var(--text)] leading-relaxed border-t border-[var(--border)]/50">
-                  {faq.a}
-                </div>
-              )}
-            </div>
-          ))}
+                <button
+                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  className="w-full flex items-center justify-between px-6 py-4.5 text-left cursor-pointer"
+                >
+                  <div className="flex items-center gap-3 pr-4">
+                    <span className="text-xs font-mono font-bold text-violet-400 px-2 py-0.5 rounded bg-violet-500/10 border border-violet-500/20 shrink-0">
+                      {faq.tag}
+                    </span>
+                    <span className="text-sm font-semibold text-white/95">{faq.q}</span>
+                  </div>
+                  <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 transition-transform duration-300 ${openFaq === i ? 'bg-violet-500/20 text-violet-300 rotate-180' : 'bg-white/[0.05] text-white/40'}`}>
+                    <ChevronDown className="w-4 h-4" />
+                  </div>
+                </button>
+                <AnimatePresence initial={false}>
+                  {openFaq === i && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                    >
+                      <div className="px-6 pb-5 text-[13.5px] text-white/65 leading-relaxed border-t border-white/[0.05] pt-4">
+                        {faq.a}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+      </main>
+
+      {/* FOOTER - Updated to match homepage styling */}
+      <footer className="relative border-t border-white/[0.05] py-12 md:py-28 bg-[#08070D] overflow-hidden mt-auto">
+        {/* Massive Background Name Watermark */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden z-0">
+          <span 
+            style={{ fontFamily: "'Outfit', sans-serif" }}
+            className="text-[18vw] font-black text-white/[0.04] tracking-tighter leading-none"
+          >
+            ECCLESIA
+          </span>
         </div>
-      </section>
+
+        <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
+          <div className="flex flex-col md:flex-row items-center gap-4 text-[13px] text-white/40">
+            {/* Bold Purple Logo */}
+            <Logo className="h-6 w-auto text-violet-500 font-bold" />
+            <p className="hidden md:block text-white/20">|</p>
+            <p>© {new Date().getFullYear()} Ecclesia. All rights reserved.</p>
+          </div>
+          <div className="flex flex-wrap justify-center items-center gap-6 font-medium text-[14px] text-white/90">
+            <a href="/" className="hover:text-white transition-colors">Home</a>
+            <a href="/pricing#faq" className="hover:text-white transition-colors">FAQ</a>
+            <a href="/contact" className="hover:text-white transition-colors">Contact</a>
+            <a href="/auth" className="hover:text-white transition-colors">Log In</a>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
