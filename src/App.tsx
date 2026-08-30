@@ -30,6 +30,7 @@ import MyAttendancePage from './pages/member/myAttendance';
 import ProfilePage from './pages/member/profilePage';
 import MemberAnnouncementsPage from './pages/member/announcementsPage';
 import MemberSermonsPage from './pages/member/sermonsPage';
+import AIOutreachPage from './pages/member/aiOutreachPage';
 
 import PaymentApprovalsPage from './pages/platformOwner/paymentApprovalPage';
 import SaaSOverviewPage from './pages/platformOwner/saasOverviewPage';
@@ -81,6 +82,7 @@ function App() {
           <Route  path='/premium' element={<PremiumPage />} />
           <Route path='/admin/announcements' element={<AnnouncementsPage />} />
           <Route path='/admin/schedule' element={<SchedulePage />} />
+          <Route path='/admin/outreach' element={<AIOutreachPage />} />
 
           //member 
           <Route path='/member/dashboard' element={<MemberDashboardPage />} />
