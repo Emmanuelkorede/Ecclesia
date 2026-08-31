@@ -284,32 +284,32 @@ export default function ProfilePage() {
         {/* Right Column: Appearance & Account Options */}
         <div className="space-y-6">
           {/* Appearance Card */}
-          <div className="bg-surface border border-subtle rounded-xl shadow-sm p-5 space-y-4">
-            <div className="flex items-center gap-3 border-b border-subtle pb-4">
-              <div className="w-9 h-9 rounded-lg bg-brand-500/10 text-brand-600 flex items-center justify-center shrink-0 border border-brand-500/20">
-                <Palette className="w-5 h-5" />
-              </div>
-              <div>
-                <h2 className="text-base font-semibold text-main leading-tight">Appearance</h2>
-                <p className="text-xs text-muted mt-0.5">Customize your workspace look and theme</p>
-              </div>
-            </div>
+<div className="bg-surface border border-subtle rounded-xl shadow-sm p-5 space-y-4">
+  <div className="flex items-center gap-3 border-b border-subtle pb-4">
+    <div className="w-9 h-9 rounded-lg bg-brand-500/10 text-brand-600 flex items-center justify-center shrink-0 border border-brand-500/20">
+      <Palette className="w-5 h-5" />
+    </div>
+    <div>
+      <h2 className="text-base font-semibold text-main leading-tight">Appearance</h2>
+      <p className="text-xs text-muted mt-0.5">Customize your workspace look and theme</p>
+    </div>
+  </div>
 
-            <div className="space-y-5">
-              <div className="flex items-center justify-between gap-4">
-                <label className="text-xs font-semibold text-main">
-                  Interface Theme
-                </label>
-                <ThemeToggle />
-              </div>
+  <div className="space-y-5">
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 items-start">
+      <label className="text-xs font-semibold text-main">
+        Interface Theme
+      </label>
+      <ThemeToggle />
+    </div>
 
-              <div className="h-px bg-subtle" />
+    <div className="h-px bg-subtle" />
 
-              <div className="space-y-2">
-                <AccentPicker />
-              </div>
-            </div>
-          </div>
+    <div className="space-y-2">
+      <AccentPicker />
+    </div>
+  </div>
+</div>
 
           {/* Account Options Card */}
           <div className="bg-surface border border-subtle rounded-xl shadow-sm p-5 space-y-4">

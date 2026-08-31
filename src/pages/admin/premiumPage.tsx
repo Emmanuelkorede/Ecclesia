@@ -22,9 +22,9 @@ const upgradePlans: { tier: PlanTier; price: number; priceFormatted: string; lab
 ];
 
 const BANK_DETAILS = {
-  bankName: 'Guaranty Trust Bank (GTB)',
-  accountName: 'Your Company Name Ltd',
-  accountNumber: '0123456789',
+  bankName: 'PalmPay',
+  accountName: 'Emmanuel Job',
+  accountNumber: '9130333471',
 };
 
 export default function PremiumPage() {

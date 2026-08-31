@@ -4,8 +4,8 @@ import { Mail, MessageSquare, MapPin, ArrowRight, Sparkles, ShieldCheck } from '
 import { Logo } from '../../components/ui/Logo';
 
 export default function ContactPage() {
-  const supportEmail = 'support@ecclesia.ng';
-  const whatsappNumber = '+2348000000000';
+  const supportEmail = 'emmanueljob2009@gmail.com';
+  const whatsappNumber = '+2349122865246';
   const whatsappMessage = 'Hello Ecclesia Support, I need assistance with my church management account.';
 
   const whatsappUrl = `https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(whatsappMessage)}`;
