@@ -30,7 +30,7 @@ import MyAttendancePage from './pages/member/myAttendance';
 import ProfilePage from './pages/member/profilePage';
 import MemberAnnouncementsPage from './pages/member/announcementsPage';
 import MemberSermonsPage from './pages/member/sermonsPage';
-import AIOutreachPage from './pages/member/aiOutreachPage';
+import AIOutreachPage from './pages/admin/aiOutreachPage';
 
 import PaymentApprovalsPage from './pages/platformOwner/paymentApprovalPage';
 import SaaSOverviewPage from './pages/platformOwner/saasOverviewPage';
