@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import  { useState, useEffect, useCallback } from 'react';
 import { useActiveOrg } from '../../hooks/useActiveOrg';
 import { useAuth } from '../../hooks/useAuth';
 import * as outreachService from '../../services/outReachService';
