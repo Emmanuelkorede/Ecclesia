@@ -11,7 +11,7 @@ import { Logo } from '../../components/ui/Logo';
 const features = [
   { icon: CalendarSync, title: 'Custom & Recurring Events', description: 'Set up Sunday Service once and let it run weekly, or create one-off conferences. Attendance logic adapts seamlessly to both.' },
   { icon: QrCode, title: 'Smart Attendance Check-in', description: 'Expiring 15-minute passcodes, dynamic QR scans, or manual admin overrides. Zero duplicated records, enforced at the database level.' },
-  { icon: Sparkles, title: 'AI Absentee Outreach', description: 'Automatic missed-service detection that drafts warm, personalized WhatsApp or SMS follow-ups before a member slips away.' },
+  { icon: Sparkles, title: 'AI Absentee Outreach', description: 'Automatic missed-service detection that drafts warm, personalized WhatsApp  follow-ups before a member slips away.' },
   { icon: Building2, title: 'True Multi-Tenancy', description: 'Manage multiple branches or switch between your role as a Pastor at one church and a volunteer at another—without logging out.' },
   { icon: BellRing, title: 'Push Announcements', description: 'Bypass crowded WhatsApp groups. Send targeted announcements with native push notifications directly to ministry sub-groups.' },
   { icon: BarChart3, title: 'Retention Analytics', description: 'Track 30-day active vs. inactive rolling windows, group-specific attendance trends, and instantly export branded PDF reports.' },
