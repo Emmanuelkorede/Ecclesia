@@ -11,7 +11,7 @@ A modern, multi-tenant Church Management SaaS platform built with React, TypeScr
 
 ## ✨ Overview
 
-Ecclesia replaces manual attendance registers and scattered spreadsheets with a single platform built specifically for church operations. Admins can run live attendance sessions with expiring passcodes and QR codes, manage sub-ministries like Choir and Ushering, track engagement analytics, and communicate with their congregation — all under a secure, multi-tenant architecture that lets one user belong to multiple churches with different roles.
+Ecclesia replaces manual attendance registers and scattered spreadsheets with a single platform built specifically for church operations. Admins can run live attendance sessions with expiring passcodes and QR codes, manage sub-ministries like Choir and Ushering, track engagement analytics, communicate with their congregation, and now use AI to help re-engage members who've drifted away — all under a secure, multi-tenant architecture that lets one user belong to multiple churches with different roles.
 
 ## 🚀 Key Features
 
@@ -31,6 +31,12 @@ Ecclesia replaces manual attendance registers and scattered spreadsheets with a 
 - Three check-in methods: auto-expiring passcodes, dynamic QR codes, and manual admin override
 - Group-restricted attendance — restrict a session to a specific ministry (e.g. only Choir members can check into Choir Practice), enforced via RLS
 - Real-time roster updates using Supabase Realtime — admins see check-ins live with no page refresh
+
+### AI-Powered Member Outreach
+- Automatically detects members who've missed recent mandatory services
+- Generates warm, personalized check-in messages using Google's Gemini API
+- Admins can review and edit each drafted message before sending
+- One-click hand-off to WhatsApp with the message pre-filled, ready to send
 
 ### Groups & Ministries
 - Create and manage sub-ministries (Choir, Ushers, Media Team, etc.)
@@ -53,7 +59,7 @@ Ecclesia replaces manual attendance registers and scattered spreadsheets with a 
 - Free, Pro, and Master pricing tiers with enforced usage limits (members, groups, events)
 - Manual payment verification flow: admins upload a bank transfer receipt, reviewed and approved by the platform owner
 - Automatic 30-day subscription tracking with expiry handling that preserves data instead of deleting it
-- Platform-owner dashboard for reviewing and approving/rejecting payments across all churches
+- Dedicated platform-owner console for reviewing/approving payments and monitoring SaaS-wide metrics across every church on the platform
 
 ### Member Experience
 - Personal dashboard with live "attendance open now" alerts
@@ -63,8 +69,7 @@ Ecclesia replaces manual attendance registers and scattered spreadsheets with a 
 
 ### Progressive Web App (PWA)
 - Installable on mobile and desktop home screens
-- Custom install prompt (not the browser default), shown only to authenticated users
-- Branded app icons and splash behavior
+- Branded app icons
 
 ---
 
@@ -77,6 +82,7 @@ Ecclesia replaces manual attendance registers and scattered spreadsheets with a 
 | **Routing** | React Router |
 | **Backend & Database** | Supabase (PostgreSQL, Auth, Storage, Realtime, Edge Functions) |
 | **Row-Level Security** | Postgres RLS policies enforcing tenant and role isolation |
+| **AI** | Google Gemini API, called via a secure Supabase Edge Function |
 | **Push Notifications** | OneSignal |
 | **Charts** | Recharts |
 | **PDF/CSV Export** | jsPDF, jspdf-autotable |
@@ -92,7 +98,9 @@ Ecclesia's schema is built around clean separation between:
 - **Events** (one-off) vs. **Church Schedules** (recurring), both able to drive attendance sessions independently
 - **Attendance Sessions** and **Attendance Logs**, supporting passcode, QR, and manual check-in methods
 - **Groups** and **Group Members** for ministry-level organization and access restriction
-- **Subscriptions** with an audit trail of manual payment approvals/rejections
+- **Outreach Messages** tracking every AI-drafted absentee message, from draft through to sent
+- **Subscriptions** with a full audit trail of manual payment approvals/rejections
+- A dedicated **platform superadmin** flag, separate from any single church's role hierarchy, gating access to cross-tenant billing oversight
 
 All tables are protected by Row Level Security policies, with helper SQL functions (`is_org_member`, `is_org_admin`, `is_group_member`, `is_platform_superadmin`) enforcing access control directly at the database layer — not just in application code.
 
@@ -101,15 +109,15 @@ All tables are protected by Row Level Security policies, with helper SQL functio
 - Row Level Security enforced on every table
 - Tenant isolation guaranteed at the database level, not just the UI
 - Storage buckets scoped per-organization and per-user with matching RLS policies
-- Sensitive operations (subscription approval) run through `SECURITY DEFINER` Postgres functions with role checks baked in
-- Secrets (API keys) never exposed client-side — all third-party integrations requiring private keys run through Supabase Edge Functions
+- Sensitive operations (subscription approval, cross-tenant reporting) run through `SECURITY DEFINER` Postgres functions and platform-superadmin checks
+- Secrets (Gemini and OneSignal API keys) never exposed client-side — all third-party integrations requiring private keys run through Supabase Edge Functions
 
 ## 📱 Responsive Design
 
 Ecclesia is built mobile-first with a fully adaptive layout:
 - Desktop: persistent sidebar navigation with organization switcher
 - Mobile: bottom tab navigation with an expandable "More" menu for admin tools
-- Installable as a native-feeling app on both platforms via PWA support
+- Installable as a native-feeling app via PWA support
 
 ---
 
