@@ -68,6 +68,11 @@ function App() {
           <Route path="/join-church" element={<MemberJoinPage />} />
         </Route>
 
+          <Route path="/add-church" element={<ChoosePathPage />} />
+          <Route path="/add-church/create" element={<ChurchRegistrationPage />} />
+          <Route path="/add-church/join" element={<MemberJoinPage />} />
+
+
         <Route element={<ProtectedLayout />}>
           {/* Layer 3: fully onboarded, dashboard routing */}
           <Route path="/admin/dashboard" element={<DashboardPage />} />

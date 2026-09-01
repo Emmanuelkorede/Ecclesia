@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate, useLocation } from 'react-router';
 import { useAuth } from '../../hooks/useAuth';
 import { useActiveOrg } from '../../hooks/useActiveOrg';
 import { createOrg } from '../../services/orgService';
@@ -14,6 +14,10 @@ export default function ChurchRegistrationPage() {
   const { user } = useAuth();
   const { refreshMemberships } = useActiveOrg();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const isAddingChurch = location.pathname.startsWith('/add-church');
+  const backPath = isAddingChurch ? '/add-church' : '/choose-path';
 
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
@@ -41,6 +45,7 @@ export default function ChurchRegistrationPage() {
 
       await refreshMemberships();
 
+      // Same destination either way — new church always makes you super_admin
       navigate('/admin/dashboard', { replace: true });
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create church. Please try again.';
@@ -53,11 +58,10 @@ export default function ChurchRegistrationPage() {
   return (
     <div className="min-h-screen w-full flex flex-col bg-app text-main transition-colors duration-200 relative">
       
-      {/* Top Navigation Bar */}
       <header className="w-full flex items-center justify-between p-4 sm:p-6 max-w-6xl mx-auto z-10">
         <button
           type="button"
-          onClick={() => navigate('/choose-path')}
+          onClick={() => navigate(backPath)}
           className="flex items-center gap-2 text-sm font-semibold text-muted hover:text-main transition-colors cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -66,13 +70,10 @@ export default function ChurchRegistrationPage() {
         <ThemeToggle />
       </header>
 
-      {/* Main Container */}
       <main className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 w-full my-auto">
         
-        {/* Widened, Breathable Card */}
         <div className="w-full max-w-md bg-surface border border-subtle rounded-3xl p-8 sm:p-10 shadow-xl transition-all">
           
-          {/* Header & Branding */}
           <div className="flex flex-col items-center text-center mb-8">
             <Logo className="h-10 w-auto text-brand-600 dark:text-brand-500 mb-5" />
             
@@ -89,7 +90,6 @@ export default function ChurchRegistrationPage() {
             </p>
           </div>
 
-          {/* Error Alert */}
           {error && (
             <div className="flex items-start gap-3 p-4 mb-6 text-sm rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 animate-in fade-in slide-in-from-top-2">
               <AlertCircle className="w-5 h-5 shrink-0 mt-0.5 text-red-500" />
@@ -97,7 +97,6 @@ export default function ChurchRegistrationPage() {
             </div>
           )}
 
-          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-2">
