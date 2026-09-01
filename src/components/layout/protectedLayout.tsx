@@ -1,4 +1,4 @@
-import { Navigate, Outlet } from 'react-router';
+import { Navigate, Outlet, useLocation } from 'react-router';
 import { useActiveOrg } from '../../hooks/useActiveOrg';
 import { useProfile } from '../../hooks/useProfile';
 
@@ -9,7 +9,6 @@ import MemberNav from './memberNav';
 import MemberBottomNav from './memberBottomNav';
 import OrgSwitcher from './orgSwitcher';
 
-
 // UI Components
 import { BrandLoader } from '../../components/ui/BrandLoader';
 import { Logo } from '../../components/ui/Logo';
@@ -17,6 +16,7 @@ import { Logo } from '../../components/ui/Logo';
 export default function ProtectedLayout() {
   const { role, memberships, loading: orgLoading } = useActiveOrg();
   const { isComplete, loading: profileLoading } = useProfile();
+  const location = useLocation();
 
   // Full-Screen Initial Loading State
   if (orgLoading || profileLoading) {
@@ -34,13 +34,20 @@ export default function ProtectedLayout() {
   }
 
   const isMemberRole = role === 'member';
+  const onAdminRoute = location.pathname.startsWith('/admin');
+  const onMemberRoute = location.pathname.startsWith('/member');
+
+  if (isMemberRole && onAdminRoute) {
+    return <Navigate to="/member/dashboard" replace />;
+  }
+  if (!isMemberRole && onMemberRoute) {
+    return <Navigate to="/admin/dashboard" replace />;
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-app transition-colors duration-200">
-      
       {/* 1. Full-Width Top Header */}
       <header className="sticky top-0 z-40 flex items-center justify-between px-4 sm:px-6 h-16 border-b border-subtle bg-surface/80 backdrop-blur-md">
-        
         {/* Left: App Brand & Logo (Bolder and Larger) */}
         <div className="flex items-center gap-3">
           <Logo className="h-8 md:h-9 w-auto font-bold text-brand-600 dark:text-brand-500 tracking-tight" />
@@ -52,11 +59,8 @@ export default function ProtectedLayout() {
         </div>
       </header>
 
-      
-
       {/* 2. Content Area (Sidebar + Main) */}
       <div className="flex flex-1 min-w-0 relative">
-        
         {/* Sidebar sitting below the top header */}
         {isMemberRole ? <MemberNav /> : <AdminSidebar />}
 
